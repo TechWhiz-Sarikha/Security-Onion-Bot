@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = (
         "default-jwt-secret"  # Default for development, should be overridden in production
     )
+    DEMO_MODE: bool = True
 
     # Database settings
     DATABASE_URL: str = "sqlite+aiosqlite:///./data/app.db"  # Relative path for development/testing

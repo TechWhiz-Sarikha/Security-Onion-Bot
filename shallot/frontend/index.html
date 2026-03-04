@@ -1,13 +1,1920 @@
+
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/shallot-favicon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Security Onion Chat Bot</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>🧅 Shallot — Security Onion Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#07090f; --s1:#0c1018; --s2:#111827; --s3:#1a2436;
+  --border:#1e2d3d; --border2:#243347;
+  --cyan:#00d4ff; --cyan-dim:rgba(0,212,255,.1); --cyan-glow:rgba(0,212,255,.25);
+  --green:#00e676; --yellow:#ffd740; --orange:#ff9100;
+  --red:#ff3d57; --purple:#b388ff; --blue:#448aff;
+  --text:#cdd9e5; --text2:#7a9ab5; --text3:#3d5a73;
+  --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif;
+  --r:10px; --r2:14px;
+  --tr:all 0.18s cubic-bezier(.4,0,.2,1);
+}
+/* Light mode */
+body.light {
+  --bg:#f0f4f8; --s1:#ffffff; --s2:#f5f8fb; --s3:#e8eef5;
+  --border:#d0dce8; --border2:#b8ccd8;
+  --text:#1a2a3a; --text2:#4a6a85; --text3:#8aA8c0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::selection{background:var(--cyan-dim);color:var(--cyan)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes blink{0%,100%{box-shadow:0 0 6px var(--green)}50%{box-shadow:0 0 14px var(--green)}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes scanline{0%{top:-10%}100%{top:110%}}
+@keyframes countUp{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+@keyframes pulse{0%{opacity:.5}50%{opacity:1}100%{opacity:.5}}
+@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* ═══ LOGIN ══════════════════════════════════════════ */
+#login-screen{
+  display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background:radial-gradient(ellipse 70% 60% at 20% 30%,rgba(0,212,255,.07) 0,transparent 100%),
+             radial-gradient(ellipse 50% 60% at 85% 75%,rgba(0,230,118,.05) 0,transparent 100%),var(--bg);
+  position:relative;overflow:hidden;
+}
+#login-screen::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(0,212,255,.025) 39px,rgba(0,212,255,.025) 40px),
+             repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(0,212,255,.025) 39px,rgba(0,212,255,.025) 40px);
+  pointer-events:none;
+}
+.scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.18),transparent);animation:scanline 5s linear infinite;pointer-events:none}
+.login-box{
+  background:var(--s1);border:1px solid var(--border2);border-radius:20px;
+  padding:52px 44px;width:420px;position:relative;z-index:2;
+  box-shadow:0 40px 100px rgba(0,0,0,.7),0 0 60px rgba(0,212,255,.04),inset 0 1px 0 rgba(0,212,255,.1);
+  animation:fadeUp .5s cubic-bezier(.4,0,.2,1);
+}
+.login-logo{text-align:center;font-size:54px;margin-bottom:6px;filter:drop-shadow(0 0 20px rgba(0,212,255,.3))}
+.login-title{text-align:center;font-size:28px;font-weight:900;color:var(--cyan);letter-spacing:3px;text-transform:uppercase}
+.login-sub{text-align:center;font-size:11px;color:var(--text2);margin-bottom:34px;font-family:var(--mono)}
+.login-sub span{color:var(--cyan);opacity:.7}
+.fl{margin-bottom:18px}
+.fl label{display:block;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.fl input{width:100%;padding:12px 16px;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:var(--tr)}
+.fl input:focus{border-color:var(--cyan);background:var(--s3);box-shadow:0 0 0 3px var(--cyan-dim)}
+.btn-login{width:100%;padding:14px;background:var(--cyan);color:#000;font-family:var(--sans);font-weight:800;font-size:13px;letter-spacing:2px;text-transform:uppercase;border:none;border-radius:var(--r);cursor:pointer;transition:var(--tr);margin-top:6px;position:relative;overflow:hidden}
+.btn-login::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transform:translateX(-100%);transition:transform .5s}
+.btn-login:hover::after{transform:translateX(100%)}
+.btn-login:hover{background:#33dbff;box-shadow:0 0 30px var(--cyan-glow);transform:translateY(-1px)}
+.login-hint{text-align:center;font-size:11px;color:var(--text3);margin-top:16px;font-family:var(--mono)}
+.login-hint b{color:var(--cyan)}
+.login-demo-btns{display:flex;gap:8px;margin-top:14px}
+.demo-role{flex:1;padding:8px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:11px;font-family:var(--mono);color:var(--text2);text-align:center;transition:var(--tr)}
+.demo-role:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+
+/* ═══ APP SHELL ══════════════════════════════════════ */
+#app{display:none}
+
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:240px;
+  background:var(--s1);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:200;
+  transition:width .28s cubic-bezier(.4,0,.2,1);
+}
+.sidebar.collapsed{width:64px}
+.sidebar-header{padding:16px 14px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;min-height:60px;overflow:hidden}
+.logo-mark{width:34px;height:34px;min-width:34px;background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(0,212,255,.05));border:1px solid rgba(0,212,255,.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:var(--tr)}
+.logo-mark:hover{box-shadow:0 0 20px var(--cyan-dim)}
+.logo-text{overflow:hidden;white-space:nowrap;min-width:0;transition:var(--tr)}
+.logo-name{font-size:16px;font-weight:900;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;display:block;line-height:1.1}
+.logo-tag{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:.5px}
+.collapse-btn{margin-left:auto;background:none;border:1px solid var(--border);color:var(--text2);width:24px;height:24px;min-width:24px;border-radius:6px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0}
+.collapse-btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+.sidebar-toggle-btn{background:none;border:1px solid var(--border);color:var(--text2);width:30px;height:30px;min-width:30px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0;margin-right:10px}
+.sidebar-toggle-btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+.sidebar.collapsed .logo-text,.sidebar.collapsed .nav-label,.sidebar.collapsed .nav-badge,.sidebar.collapsed .user-info,.sidebar.collapsed .ticker-wrap,.sidebar.collapsed .ticker-label,.sidebar.collapsed .nav-section-label{opacity:0;pointer-events:none;width:0}
+.sidebar.collapsed .alert-ticker{padding:6px 0;justify-content:center}
+.sidebar.collapsed .collapse-btn{transform:rotate(180deg)}
+/* Floating re-expand tab on sidebar edge when collapsed */
+.sidebar-expand-tab{position:fixed;left:64px;top:50%;transform:translateY(-50%);width:14px;height:48px;background:var(--s3);border:1px solid var(--border2);border-left:none;border-radius:0 8px 8px 0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--text2);transition:var(--tr);z-index:100;opacity:0;pointer-events:none}
+.sidebar-expand-tab:hover{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan)}
+.sidebar.collapsed~.sidebar-expand-tab,.sidebar.collapsed+*~.sidebar-expand-tab{opacity:1;pointer-events:auto}
+#sb.collapsed~#expand-tab{opacity:1;pointer-events:auto}
+.sidebar.collapsed .nav-item{justify-content:center;padding:9px 0}
+.sidebar.collapsed .nav-icon{margin:0}
+
+.alert-ticker{display:flex;align-items:center;border-bottom:1px solid rgba(255,61,87,.15);background:rgba(255,61,87,.05);overflow:hidden;min-height:30px}
+.ticker-label{font-size:9px;font-weight:700;color:var(--red);letter-spacing:1px;padding:0 10px;flex-shrink:0;font-family:var(--mono)}
+.ticker-wrap{overflow:hidden;flex:1;position:relative}
+.ticker-track{display:inline-flex;animation:ticker 35s linear infinite}
+.ticker-item{white-space:nowrap;font-size:10px;font-family:var(--mono);color:var(--text2);padding-right:48px}
+.ticker-item span{color:var(--red)}
+
+.nav{padding:8px;flex:1;overflow-y:auto}
+.nav-section-label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:8px 8px 3px;font-family:var(--mono);white-space:nowrap;overflow:hidden;transition:var(--tr)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;margin-bottom:1px;user-select:none;transition:var(--tr);position:relative;overflow:hidden;white-space:nowrap}
+.nav-item:hover{background:var(--s2)}
+.nav-item.active{background:var(--cyan-dim);color:var(--cyan)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:2px;background:var(--cyan);border-radius:0 2px 2px 0}
+.nav-icon{font-size:15px;width:22px;min-width:22px;text-align:center;flex-shrink:0}
+.nav-label{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;transition:var(--tr)}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:8px;font-family:var(--mono);flex-shrink:0;transition:var(--tr);animation:pulse 2s infinite}
+
+.sidebar-bottom{padding:8px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);overflow:hidden;transition:var(--tr)}
+.user-card:hover{border-color:var(--border2)}
+.user-avatar{width:32px;height:32px;min-width:32px;border-radius:9px;background:linear-gradient(135deg,var(--cyan-dim),transparent);border:1px solid rgba(0,212,255,.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--cyan);flex-shrink:0}
+.user-info{overflow:hidden;flex:1;min-width:0;transition:var(--tr)}
+.user-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-role-lbl{font-size:9px;color:var(--text2);font-family:var(--mono)}
+.logout-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;transition:var(--tr);flex-shrink:0}
+.logout-btn:hover{color:var(--red)}
+
+.topbar{
+  position:fixed;left:240px;top:0;right:0;height:56px;
+  background:rgba(12,16,24,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 22px;gap:14px;z-index:100;
+  transition:left .28s cubic-bezier(.4,0,.2,1),background .3s;
+}
+body.light .topbar{background:rgba(240,244,248,.92)}
+.topbar.shifted{left:64px}
+.bc{display:flex;align-items:center;gap:7px}
+.bc-icon{font-size:15px}
+.bc-title{font-size:14px;font-weight:700;color:var(--text)}
+.bc-sep{color:var(--text3);font-size:11px}
+.bc-sub{font-size:11px;color:var(--text2);font-family:var(--mono)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.status-pill{display:flex;align-items:center;gap:5px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;color:var(--green);font-family:var(--mono)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s infinite;flex-shrink:0}
+.topbar-clock{font-family:var(--mono);font-size:11px;color:var(--text2);min-width:76px}
+.kbd-hint{font-size:10px;color:var(--text3);font-family:var(--mono)}
+kbd{background:var(--s3);border:1px solid var(--border2);border-radius:3px;padding:1px 5px;font-size:9px;font-family:var(--mono);color:var(--text2)}
+
+/* Theme toggle */
+.theme-toggle{background:none;border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0}
+.theme-toggle:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+
+/* Export btn */
+.export-btn{background:none;border:1px solid var(--border);color:var(--text2);padding:5px 10px;border-radius:8px;cursor:pointer;font-size:11px;font-family:var(--mono);display:flex;align-items:center;gap:5px;transition:var(--tr)}
+.export-btn:hover{border-color:var(--green);color:var(--green);background:rgba(0,230,118,.08)}
+
+.main{margin-left:240px;padding-top:56px;min-height:100vh;transition:margin-left .28s cubic-bezier(.4,0,.2,1)}
+.main.shifted{margin-left:64px}
+.page{display:none;padding:24px 26px;animation:fadeIn .2s ease}
+.page.active{display:block}
+
+/* ═══ STAT CARDS ═════════════════════════════════════ */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);padding:20px 22px;position:relative;overflow:hidden;transition:var(--tr);cursor:default}
+.stat-card:hover{transform:translateY(-3px);border-color:var(--border2);box-shadow:0 12px 32px rgba(0,0,0,.3)}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:.8}
+.c-all::after{background:linear-gradient(90deg,var(--cyan),transparent)}
+.c-crit::after{background:linear-gradient(90deg,var(--red),transparent)}
+.c-high::after{background:linear-gradient(90deg,var(--yellow),transparent)}
+.c-open::after{background:linear-gradient(90deg,var(--orange),transparent)}
+.stat-icon{position:absolute;right:16px;top:14px;font-size:28px;opacity:.08;transition:var(--tr)}
+.stat-card:hover .stat-icon{opacity:.15;transform:scale(1.1)}
+.stat-num{font-size:44px;font-weight:900;font-family:var(--mono);line-height:1;animation:countUp .5s ease}
+.c-all .stat-num{color:var(--cyan)} .c-crit .stat-num{color:var(--red)} .c-high .stat-num{color:var(--yellow)} .c-open .stat-num{color:var(--orange)}
+.stat-label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-top:7px}
+.stat-delta{font-size:10px;font-family:var(--mono);margin-top:3px;color:var(--text3)}
+.stat-trend{position:absolute;bottom:14px;right:16px;font-size:11px;font-family:var(--mono);font-weight:700}
+.trend-up{color:var(--red)} .trend-dn{color:var(--green)}
+
+/* ═══ CARDS ══════════════════════════════════════════ */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;transition:background .3s,border-color .3s}
+.card-hd{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px}
+.card-hd .ci{font-size:14px}
+.card-hd .cc{margin-left:auto;background:var(--cyan-dim);color:var(--cyan);font-size:10px;padding:2px 8px;border-radius:8px;font-family:var(--mono)}
+.card-body{padding:16px}
+
+/* ═══ CHIPS ══════════════════════════════════════════ */
+.chip{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px;font-family:var(--mono);white-space:nowrap}
+.chip-critical{background:rgba(255,61,87,.14);color:#ff5c72;border:1px solid rgba(255,61,87,.28)}
+.chip-high{background:rgba(255,215,64,.12);color:#ffd740;border:1px solid rgba(255,215,64,.25)}
+.chip-medium{background:rgba(255,145,0,.12);color:#ff9100;border:1px solid rgba(255,145,0,.25)}
+.chip-low{background:rgba(0,230,118,.1);color:#00e676;border:1px solid rgba(0,230,118,.22)}
+.chip-open{background:rgba(255,61,87,.1);color:#ff5c72;border:1px solid rgba(255,61,87,.22)}
+.chip-investigating{background:rgba(255,215,64,.1);color:#ffd740;border:1px solid rgba(255,215,64,.2)}
+.chip-resolved{background:rgba(0,230,118,.09);color:#00e676;border:1px solid rgba(0,230,118,.2)}
+.chip-info{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dc{background:var(--red)} .dh{background:var(--yellow)} .dm{background:var(--orange)} .dl{background:var(--green)}
+
+/* ═══ TABLE ══════════════════════════════════════════ */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:9px 14px;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid var(--border);background:var(--s2);white-space:nowrap;cursor:pointer;user-select:none;transition:var(--tr)}
+th:hover{color:var(--cyan)}
+th.sort-asc::after{content:' ↑';color:var(--cyan)}
+th.sort-desc::after{content:' ↓';color:var(--cyan)}
+td{padding:10px 14px;border-bottom:1px solid rgba(30,45,66,.4);vertical-align:middle;transition:background .1s}
+body.light td{border-bottom-color:rgba(208,220,232,.5)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(0,212,255,.025)}
+.rn{font-weight:600;color:var(--text);max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.rc{font-size:10px;color:var(--text2);font-family:var(--mono);margin-top:1px}
+.ip{font-family:var(--mono);font-size:11px;color:#6fa3c4}
+.hit{background:var(--s2);border:1px solid var(--border);color:var(--cyan);font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:4px}
+
+/* ═══ BUTTONS ════════════════════════════════════════ */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:600;font-family:var(--sans);transition:var(--tr);white-space:nowrap;border:none}
+.btn-cyan{background:var(--cyan);color:#000}
+.btn-cyan:hover{background:#33dbff;box-shadow:0 0 20px var(--cyan-glow);transform:translateY(-1px)}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+.btn-danger{background:rgba(255,61,87,.12);border:1px solid rgba(255,61,87,.25);color:var(--red)}
+.btn-danger:hover{background:rgba(255,61,87,.2)}
+.act{background:none;border:1px solid var(--border);color:var(--text2);padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;transition:var(--tr)}
+.act:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+
+/* ═══ FILTERS ════════════════════════════════════════ */
+.filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.fi,.fs{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:var(--r);font-family:var(--mono);font-size:12px;outline:none;transition:var(--tr)}
+.fi{flex:1;min-width:180px} .fs{min-width:130px}
+.fi:focus,.fs:focus{border-color:var(--cyan);background:var(--s3)}
+.fs option{background:var(--s2)}
+
+/* ═══ DASHBOARD CHARTS ═══════════════════════════════ */
+.mini-bars{display:flex;align-items:flex-end;gap:3px;height:60px}
+.mb{flex:1;border-radius:3px 3px 0 0;min-width:5px;transition:height .6s ease,opacity .2s;opacity:.82;cursor:pointer;position:relative}
+.mb:hover{opacity:1;filter:brightness(1.3)}
+.mb:hover::after{content:attr(title);position:absolute;bottom:calc(100%+4px);left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);color:var(--text);font-size:10px;font-family:var(--mono);padding:3px 7px;border-radius:5px;white-space:nowrap;pointer-events:none;z-index:10}
+.donut-wrap{position:relative;width:120px;height:120px;margin:0 auto}
+.donut-wrap svg{transform:rotate(-90deg);transition:all .6s}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-num{font-size:24px;font-weight:900;font-family:var(--mono);color:var(--cyan);line-height:1}
+.donut-lbl{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.cat-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cat-name{font-size:11px;width:145px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-track{flex:1;height:6px;background:var(--s3);border-radius:3px;overflow:hidden;cursor:pointer}
+.bar-fill{height:100%;border-radius:3px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+.bar-track:hover .bar-fill{filter:brightness(1.2)}
+.cat-count{font-family:var(--mono);font-size:10px;color:var(--text2);width:20px;text-align:right}
+
+/* ═══ LIVE FEED ══════════════════════════════════════ */
+.feed-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:var(--r);margin-bottom:4px;background:var(--s2);border:1px solid var(--border);font-size:11px;animation:slideDown .3s ease}
+.fi-time{font-family:var(--mono);color:var(--text3);min-width:56px;font-size:10px}
+.fi-rule{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.fi-ip{font-family:var(--mono);color:#6fa3c4;font-size:10px;min-width:90px;text-align:right}
+.fpulse{width:7px;height:7px;min-width:7px;border-radius:50%;flex-shrink:0}
+.fpulse.fc{background:var(--red);animation:blink 1s infinite}
+.fpulse.fh{background:var(--yellow);animation:blink 1.5s infinite}
+.fpulse.fm{background:var(--orange)}
+.fpulse.fl{background:var(--green)}
+
+/* ═══ HEATMAP ════════════════════════════════════════ */
+.hm-grid{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;margin-top:10px}
+.hm-cell{height:24px;border-radius:4px;cursor:pointer;transition:var(--tr);position:relative}
+.hm-cell:hover{filter:brightness(1.5);transform:scaleY(1.1)}
+.hm-cell:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--s3);border:1px solid var(--border2);color:var(--text);font-size:10px;font-family:var(--mono);padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:20}
+.hm-lbl{display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--text3);font-family:var(--mono)}
+
+/* ═══ THREAT TIMELINE ════════════════════════════════ */
+.timeline-wrap{position:relative;padding:10px 0}
+.timeline-item{display:flex;gap:14px;margin-bottom:16px;animation:slideIn .3s ease}
+.tl-dot{width:10px;height:10px;min-width:10px;border-radius:50%;margin-top:4px;flex-shrink:0;position:relative}
+.tl-dot::before{content:'';position:absolute;inset:-3px;border-radius:50%;opacity:.3}
+.tl-dot.tc{background:var(--red)} .tl-dot.tc::before{background:var(--red)}
+.tl-dot.th{background:var(--yellow)} .tl-dot.th::before{background:var(--yellow)}
+.tl-dot.tm{background:var(--orange)} .tl-dot.tm::before{background:var(--orange)}
+.tl-dot.tl{background:var(--green)} .tl-dot.tl::before{background:var(--green)}
+.tl-line{position:absolute;left:4px;top:10px;bottom:0;width:1px;background:var(--border);z-index:0}
+.tl-body{flex:1}
+.tl-rule{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.tl-meta{font-size:10px;color:var(--text2);font-family:var(--mono);display:flex;gap:8px;flex-wrap:wrap}
+
+/* ═══ DETAIL ═════════════════════════════════════════ */
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--text2);background:none;border:1px solid var(--border);padding:7px 14px;border-radius:var(--r);cursor:pointer;font-size:12px;margin-bottom:20px;transition:var(--tr);font-family:var(--sans);font-weight:600}
+.back-btn:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+.detail-grid{display:grid;grid-template-columns:1fr 300px;gap:16px}
+.detail-fields{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}
+.fb{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;transition:var(--tr)}
+.fb:hover{border-color:var(--border2)}
+.fl2{font-size:9px;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;font-weight:700}
+.fv{font-family:var(--mono);font-size:12px;color:var(--text)}
+.msg-box{background:var(--s2);border-left:3px solid var(--cyan);padding:14px 16px;border-radius:0 var(--r) var(--r) 0;font-size:12px;line-height:1.8;margin-bottom:14px;color:var(--text)}
+.notes-list{max-height:220px;overflow-y:auto;margin-bottom:12px}
+.note-item{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:7px;animation:slideIn .2s ease}
+.note-meta{font-size:10px;color:var(--text2);margin-bottom:4px;font-family:var(--mono);display:flex;align-items:center;gap:6px}
+.note-text{font-size:12px;line-height:1.6}
+.note-empty{color:var(--text3);font-size:12px;font-family:var(--mono);padding:16px 0;text-align:center}
+.note-form textarea{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);padding:10px 12px;font-family:var(--mono);font-size:12px;resize:none;outline:none;transition:var(--tr)}
+.note-form textarea:focus{border-color:var(--cyan);background:var(--s3)}
+.note-form-row{display:flex;gap:8px;margin-top:8px}
+.add-note-btn{background:var(--cyan);color:#000;border:none;padding:8px 18px;border-radius:var(--r);cursor:pointer;font-weight:800;font-size:12px;font-family:var(--sans);transition:var(--tr);white-space:nowrap}
+.add-note-btn:hover{background:#33dbff;box-shadow:0 0 14px var(--cyan-glow)}
+.cmd-sugg{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;margin-bottom:6px;font-family:var(--mono);font-size:11px;color:var(--cyan);display:flex;justify-content:space-between;align-items:center;gap:8px;transition:var(--tr)}
+.cmd-sugg:hover{border-color:var(--border2);background:var(--s3)}
+.cmd-sugg span{flex:1;word-break:break-all}
+.copy-mini{background:none;border:1px solid var(--border);color:var(--text3);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-family:var(--mono);transition:var(--tr);flex-shrink:0}
+.copy-mini:hover{border-color:var(--cyan);color:var(--cyan)}
+.status-btns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.stt{padding:6px 14px;border-radius:6px;border:1px solid;cursor:pointer;font-size:11px;font-weight:700;font-family:var(--mono);transition:var(--tr);background:none}
+.stt-open{border-color:rgba(255,61,87,.3);color:var(--red)}
+.stt-open:hover,.stt-open.active{background:rgba(255,61,87,.12)}
+.stt-inv{border-color:rgba(255,215,64,.3);color:var(--yellow)}
+.stt-inv:hover,.stt-inv.active{background:rgba(255,215,64,.1)}
+.stt-res{border-color:rgba(0,230,118,.3);color:var(--green)}
+.stt-res:hover,.stt-res.active{background:rgba(0,230,118,.1)}
+
+/* ═══ MITRE ATT&CK ═══════════════════════════════════ */
+.mitre-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(179,136,255,.1);border:1px solid rgba(179,136,255,.25);color:var(--purple);padding:3px 9px;border-radius:5px;font-size:10px;font-family:var(--mono);margin:2px;cursor:pointer;transition:var(--tr)}
+.mitre-tag:hover{background:rgba(179,136,255,.2)}
+
+/* ═══ GEO PANEL ══════════════════════════════════════ */
+.geo-flag{font-size:20px;line-height:1}
+.geo-panel{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:12px}
+.geo-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px}
+.geo-row:last-child{border-bottom:none}
+.geo-key{color:var(--text2);font-family:var(--mono)}
+.geo-val{color:var(--text);font-weight:600;font-family:var(--mono)}
+
+/* ═══ COMMANDS ═══════════════════════════════════════ */
+.cmd-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
+.cmd-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;transition:var(--tr);display:flex;flex-direction:column}
+.cmd-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.cmd-head{padding:14px 16px 10px;display:flex;align-items:flex-start;gap:10px}
+.cmd-ico{width:36px;height:36px;min-width:36px;border-radius:9px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;transition:var(--tr)}
+.cmd-card:hover .cmd-ico{transform:scale(1.05)}
+.cmd-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;line-height:1.3}
+.cmd-desc{font-size:11px;color:var(--text2);line-height:1.5}
+.cmd-code-wrap{margin:0 14px 10px;background:#060810;border:1px solid var(--border);border-radius:var(--r);padding:10px 12px 10px 14px;position:relative;overflow:hidden}
+body.light .cmd-code-wrap{background:#f0f4f8}
+.cmd-code-wrap::before{content:'$ ';color:var(--text3);font-family:var(--mono);font-size:12px;position:absolute;left:14px;top:10px;user-select:none}
+pre.cmd-code{font-family:var(--mono);font-size:12px;color:var(--cyan);white-space:pre-wrap;word-break:break-all;padding-left:18px;max-height:80px;overflow:hidden}
+.cmd-copy{position:absolute;top:7px;right:8px;background:none;border:1px solid var(--border);color:var(--text3);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-family:var(--mono);transition:var(--tr)}
+.cmd-copy:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+.cmd-foot{padding:8px 16px 14px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:auto}
+.tag{font-size:10px;background:var(--s2);border:1px solid var(--border);color:var(--text2);padding:2px 7px;border-radius:4px;font-family:var(--mono)}
+.cpill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;margin-left:auto;font-family:var(--mono)}
+.cn{background:rgba(68,138,255,.12);color:var(--blue);border:1px solid rgba(68,138,255,.2)}
+.cl{background:rgba(0,212,255,.1);color:var(--cyan);border:1px solid rgba(0,212,255,.2)}
+.cf{background:rgba(179,136,255,.1);color:var(--purple);border:1px solid rgba(179,136,255,.2)}
+.cs{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2)}
+.ct{background:rgba(255,145,0,.1);color:var(--orange);border:1px solid rgba(255,145,0,.2)}
+.cg{background:rgba(122,154,181,.1);color:var(--text2);border:1px solid rgba(122,154,181,.15)}
+
+/* ═══ ADMIN ══════════════════════════════════════════ */
+.tab-row{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tab-btn{padding:10px 20px;background:none;border:none;color:var(--text2);cursor:pointer;font-size:12px;font-weight:600;font-family:var(--sans);border-bottom:2px solid transparent;margin-bottom:-1px;transition:var(--tr)}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab-btn:hover:not(.active){color:var(--text)}
+.tc{display:none} .tc.active{display:block;animation:fadeIn .2s ease}
+.sec-hdr{display:flex;align-items:center;margin-bottom:14px;gap:10px}
+.sec-hdr h2{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text2)}
+.admin-chip{background:rgba(255,215,64,.12);color:var(--yellow);border:1px solid rgba(255,215,64,.22)}
+
+/* ═══ MODAL ══════════════════════════════════════════ */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:999;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--border2);border-radius:18px;padding:28px;width:460px;max-width:95vw;box-shadow:0 40px 100px rgba(0,0,0,.8);animation:fadeUp .22s ease;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:15px;font-weight:800;margin-bottom:20px;color:var(--text)}
+.mfl{margin-bottom:14px}
+.mfl label{display:block;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.mfl input,.mfl select,.mfl textarea{width:100%;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:var(--tr)}
+.mfl input:focus,.mfl select:focus,.mfl textarea:focus{border-color:var(--cyan);background:var(--s3)}
+.mfl select option{background:var(--s2)}
+.mfl-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ma{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--text2);padding:9px 20px;border-radius:var(--r);cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:600;transition:var(--tr)}
+.btn-cancel:hover{border-color:var(--text2);color:var(--text)}
+
+/* ═══ SEARCH OVERLAY ════════════════════════════════ */
+#global-search-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:998;align-items:flex-start;justify-content:center;padding-top:100px}
+#global-search-overlay.open{display:flex}
+.gs-box{background:var(--s1);border:1px solid var(--border2);border-radius:16px;width:600px;max-width:95vw;box-shadow:0 40px 100px rgba(0,0,0,.9);animation:fadeUp .2s ease;overflow:hidden}
+.gs-input{width:100%;padding:16px 20px;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:15px;outline:none}
+.gs-results{max-height:400px;overflow-y:auto;padding:8px}
+.gs-result{padding:10px 14px;border-radius:var(--r);cursor:pointer;transition:var(--tr);display:flex;align-items:center;gap:10px}
+.gs-result:hover{background:var(--s2)}
+.gs-icon{font-size:16px;width:24px;text-align:center}
+.gs-title{font-size:13px;font-weight:600;color:var(--text)}
+.gs-sub{font-size:11px;color:var(--text2);font-family:var(--mono)}
+.gs-cat{margin-left:auto;font-size:10px;color:var(--text3);font-family:var(--mono)}
+.gs-empty{text-align:center;padding:30px;color:var(--text3);font-family:var(--mono);font-size:12px}
+.gs-hint{padding:8px 14px 12px;font-size:10px;color:var(--text3);font-family:var(--mono);border-top:1px solid var(--border);display:flex;gap:14px}
+
+/* ═══ SNACKBAR ═══════════════════════════════════════ */
+#snack{position:fixed;bottom:24px;right:24px;background:var(--s3);border:1px solid var(--cyan);color:var(--cyan);padding:10px 18px;border-radius:var(--r);font-size:12px;font-family:var(--mono);opacity:0;transform:translateY(8px) scale(.97);transition:all .22s cubic-bezier(.4,0,.2,1);pointer-events:none;z-index:9999;box-shadow:0 8px 32px rgba(0,212,255,.12);display:flex;align-items:center;gap:8px}
+#snack.show{opacity:1;transform:none}
+#snack.snack-err{border-color:var(--red);color:var(--red)}
+#snack.snack-ok{border-color:var(--green);color:var(--green)}
+
+/* ═══ MISC ═══════════════════════════════════════════ */
+.ph{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ph h1{font-size:20px;font-weight:900;color:var(--text);letter-spacing:.5px}
+.ph p{font-size:11px;color:var(--text2);margin-top:2px;font-family:var(--mono)}
+.empty-state{text-align:center;padding:36px 20px;color:var(--text2);font-family:var(--mono);font-size:12px}
+.empty-state .ei{font-size:34px;margin-bottom:8px;opacity:.4}
+.loading-spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+
+@media(max-width:960px){
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .detail-grid{grid-template-columns:1fr}
+  .cmd-grid{grid-template-columns:1fr}
+  .sidebar{width:64px}
+  .sidebar .logo-text,.sidebar .nav-label,.sidebar .nav-badge,.sidebar .user-info,.sidebar .ticker-wrap,.sidebar .ticker-label,.sidebar .nav-section-label{opacity:0;pointer-events:none;width:0}
+  .main{margin-left:64px}
+  .topbar{left:64px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="scan-line"></div>
+  <div class="login-box">
+    <div class="login-logo">🧅</div>
+    <div class="login-title">Shallot</div>
+    <div class="login-sub">Security Onion Assistant <span>// demo v2.1</span></div>
+    <div class="fl"><label>Username</label><input type="text" id="lu" value="admin" autocomplete="off"/></div>
+    <div class="fl"><label>Password</label><input type="password" id="lp" value="admin123"/></div>
+    <button class="btn-login" onclick="doLogin()">▶ &nbsp;AUTHENTICATE</button>
+    <div class="login-hint" style="margin-top:10px">Any credentials accepted in demo mode</div>
+    <div class="login-demo-btns">
+      <div class="demo-role" onclick="quickLogin('admin','admin123')">👑 Admin</div>
+      <div class="demo-role" onclick="quickLogin('analyst1','pass')">🔍 Analyst</div>
+      <div class="demo-role" onclick="quickLogin('soc_lead','pass')">🛡️ SOC Lead</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sb">
+    <div class="sidebar-header">
+      <div class="logo-mark">🧅</div>
+      <div class="logo-text"><span class="logo-name">Shallot</span><span class="logo-tag">sec-onion assistant</span></div>
+      <button class="collapse-btn" onclick="toggleSidebar()">◀</button>
+    </div>
+    <div class="alert-ticker">
+      <div class="ticker-label">⚡</div>
+      <div class="ticker-wrap"><div class="ticker-track" id="ticker"></div></div>
+    </div>
+    <nav class="nav" id="sidebar-nav">
+      <!-- Rendered by JS based on role -->
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-avatar" id="uavatar">A</div>
+        <div class="user-info"><div class="user-name" id="uname">admin</div><div class="user-role-lbl" id="urole">ADMINISTRATOR</div></div>
+        <button class="logout-btn" onclick="doLogout()" title="Logout">⏻</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar edge expand tab (visible when collapsed) -->
+  <div class="sidebar-expand-tab" id="expand-tab" onclick="toggleSidebar()" title="Expand sidebar">▶</div>
+
+  <!-- Topbar -->
+  <div class="topbar" id="topbar">
+    <button class="sidebar-toggle-btn" onclick="toggleSidebar()" title="Toggle sidebar ([ key)">☰</button>
+    <div class="bc">
+      <span class="bc-icon" id="bcicon">📊</span>
+      <span class="bc-title" id="bctitle">Dashboard</span>
+      <span class="bc-sep">›</span>
+      <span class="bc-sub" id="bcsub">Security overview</span>
+    </div>
+    <div class="topbar-right">
+      <span class="kbd-hint" id="kbdhint"></span>
+      <button class="export-btn" onclick="exportCSV()" title="Export alerts to CSV">⬇ CSV</button>
+      <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle light/dark">🌙</button>
+      <span class="topbar-clock" id="clock"></span>
+      <div class="status-pill"><div class="status-dot"></div>DEMO LIVE</div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="main" id="main">
+
+    <!-- ████ DASHBOARD — fully rendered by JS per role ████ -->
+    <div id="page-dashboard" class="page active">
+      <div id="role-dashboard-panel"></div>
+    </div>
+
+    <!-- ████ ALERTS ████ -->
+    <div id="page-alerts" class="page">
+      <div class="ph">
+        <div><h1 id="alerts-page-title">Security Alerts</h1><p id="alerts-page-sub">Suricata / Snort mock rules — Security Onion format</p></div>
+        <div style="display:flex;gap:8px" id="alerts-page-actions"></div>
+      </div>
+      <!-- Role banner injected here -->
+      <div id="alerts-role-banner"></div>
+      <div class="filters">
+        <input class="fi" type="text" id="asearch" placeholder="🔍  Search rule, IP, message..." oninput="renderAlerts()"/>
+        <select class="fs" id="asev" onchange="renderAlerts()">
+          <option value="">All Severities</option>
+          <option value="critical">🔴 Critical</option>
+          <option value="high">🟡 High</option>
+          <option value="medium">🟠 Medium</option>
+          <option value="low">🟢 Low</option>
+        </select>
+        <select class="fs" id="astat" onchange="renderAlerts()">
+          <option value="">All Statuses</option>
+          <option value="open">Open</option>
+          <option value="investigating">Investigating</option>
+          <option value="resolved">Resolved</option>
+        </select>
+        <select class="fs" id="acat" onchange="renderAlerts()"><option value="">All Categories</option></select>
+        <button class="btn btn-ghost" style="padding:8px 12px" onclick="clearFilters()">✕ Clear</button>
+      </div>
+      <div class="card">
+        <div class="tw"><table id="alerts-table">
+          <thead><tr>
+            <th onclick="sortAlerts('timestamp')">Time</th>
+            <th onclick="sortAlerts('rule_name')">Rule Name</th>
+            <th onclick="sortAlerts('severity')">Sev</th>
+            <th onclick="sortAlerts('source_ip')">Source IP</th>
+            <th>Dest IP</th><th>Proto</th>
+            <th onclick="sortAlerts('count')">Hits</th>
+            <th onclick="sortAlerts('status')">Status</th>
+            <th>Geo</th><th id="mitre-col-hdr">MITRE</th><th></th>
+          </tr></thead>
+          <tbody id="alerts-tbody"></tbody>
+        </table></div>
+        <div id="alerts-empty" class="empty-state" style="display:none"><div class="ei">🔍</div>No alerts match filters</div>
+        <div id="alerts-count" style="padding:10px 16px;font-size:11px;color:var(--text3);font-family:var(--mono);border-top:1px solid var(--border)"></div>
+      </div>
+    </div>
+
+    <!-- ████ ALERT DETAIL ████ -->
+    <div id="page-alert-detail" class="page">
+      <button class="back-btn" onclick="backToAlerts()">← Back to Alerts</button>
+      <div id="detail-content"></div>
+    </div>
+
+    <!-- ████ TIMELINE ████ -->
+    <div id="page-timeline" class="page">
+      <div id="timeline-page-content"></div>
+    </div>
+
+    <!-- ████ COMMANDS ████ -->
+    <div id="page-commands" class="page">
+      <div id="commands-page-header"></div>
+      <div class="filters">
+        <input class="fi" type="text" id="csearch" placeholder="🔍  Search commands..." oninput="renderCmds()"/>
+        <select class="fs" id="ccat" onchange="renderCmds()">
+          <option value="">All Categories</option>
+          <option value="network">Network</option><option value="logs">Logs</option>
+          <option value="forensics">Forensics</option><option value="system">System</option>
+          <option value="threat-hunting">Threat Hunting</option><option value="general">General</option>
+        </select>
+      </div>
+      <div class="cmd-grid" id="cmd-grid"></div>
+      <div id="cmd-empty" class="empty-state" style="display:none"><div class="ei">⌨️</div>No commands found</div>
+    </div>
+
+    <!-- ████ REPORTS (SOC Lead only) ████ -->
+    <div id="page-reports" class="page">
+      <div class="ph"><div><h1>SOC Reports</h1><p>Shift summaries · escalation reports · SLA metrics</p></div></div>
+      <div id="reports-content"></div>
+    </div>
+
+    <!-- ████ MY CASES (Analyst only) ████ -->
+    <div id="page-mycases" class="page">
+      <div class="ph"><div><h1>My Cases</h1><p>Alerts assigned to you — personal investigation queue</p></div></div>
+      <div id="mycases-content"></div>
+    </div>
+
+    <!-- ████ ADMIN ████ -->
+    <div id="page-admin" class="page">
+      <div class="ph"><div><h1>Admin Panel</h1><p>User management, audit log &amp; system info</p></div></div>
+      <div class="tab-row">
+        <button class="tab-btn active" onclick="switchTab('users',this)">👥 Users</button>
+        <button class="tab-btn" onclick="switchTab('logs',this)">📋 Audit Log</button>
+        <button class="tab-btn" onclick="switchTab('system',this)">🖥️ System</button>
+      </div>
+      <div id="tc-users" class="tc active">
+        <div class="sec-hdr"><h2>User Management</h2><button class="btn btn-cyan" style="margin-left:auto" onclick="openUserModal()">+ Add User</button></div>
+        <div class="card"><div class="tw"><table><thead><tr><th>#</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th><th>Last Login</th><th>Created</th><th></th></tr></thead><tbody id="users-tbody"></tbody></table></div></div>
+      </div>
+      <div id="tc-logs" class="tc">
+        <div class="card"><div class="tw"><table><thead><tr><th>Time</th><th>Action</th><th>User</th><th>Detail</th></tr></thead><tbody id="logs-tbody"></tbody></table></div></div>
+      </div>
+      <div id="tc-system" class="tc">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px">
+          <div class="card"><div class="card-hd"><span class="ci">🐍</span> Backend</div><div class="card-body" style="font-family:var(--mono);font-size:12px;line-height:2.4"><span style="color:var(--text2)">Framework</span><br>FastAPI 0.111<br><span style="color:var(--text2)">Python</span><br>3.11+<br><span style="color:var(--text2)">Mode</span><br><span style="color:var(--cyan)">DEMO (mock)</span></div></div>
+          <div class="card"><div class="card-hd"><span class="ci">🗄️</span> Database</div><div class="card-body" style="font-family:var(--mono);font-size:12px;line-height:2.4"><span style="color:var(--text2)">Engine</span><br>SQLite 3<br><span style="color:var(--text2)">File</span><br>shallot.db<br><span style="color:var(--text2)">Status</span><br><span style="color:var(--green)">Seeded ✓</span></div></div>
+          <div class="card"><div class="card-hd"><span class="ci">⚡</span> Integrations</div><div class="card-body" style="font-family:var(--mono);font-size:12px;line-height:2.4"><span style="color:var(--text2)">Slack</span><br><span style="color:var(--text3)">disabled</span><br><span style="color:var(--text2)">Discord</span><br><span style="color:var(--text3)">disabled</span><br><span style="color:var(--text2)">SO API</span><br><span style="color:var(--text3)">mock mode</span></div></div>
+        </div>
+        <div class="card"><div class="card-hd"><span class="ci">🚀</span> Run Commands</div>
+          <div class="card-body"><div style="background:#060810;border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;font-family:var(--mono);font-size:12px;line-height:2.4">
+            <span style="color:var(--text2)"># Backend</span><br>
+            <span style="color:var(--green)">cd</span> backend &amp;&amp; pip install -r requirements.txt<br>
+            <span style="color:var(--cyan)">uvicorn</span> app.main:app --reload --port 8000<br><br>
+            <span style="color:var(--text2)"># Frontend</span><br>
+            <span style="color:var(--green)">cd</span> frontend &amp;&amp; npm install<br>
+            <span style="color:var(--cyan)">npm</span> run dev &nbsp;<span style="color:var(--text3)"># → http://localhost:5173</span>
+          </div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Global Search Overlay -->
+<div id="global-search-overlay" onclick="closeGlobalSearch(event)">
+  <div class="gs-box">
+    <input class="gs-input" id="gs-input" placeholder="Search alerts, commands, users..." oninput="doGlobalSearch(this.value)" autocomplete="off"/>
+    <div id="gs-results"></div>
+    <div class="gs-hint"><kbd>Enter</kbd> select &nbsp;<kbd>Esc</kbd> close &nbsp;<kbd>Ctrl+K</kbd> open</div>
+  </div>
+</div>
+
+<!-- Modals -->
+<div class="mo" id="cmd-modal">
+  <div class="modal">
+    <h3 id="cmd-modal-h">New Command</h3>
+    <div class="mfl"><label>Title</label><input id="cmf-title" placeholder="e.g. Check open ports"/></div>
+    <div class="mfl"><label>Command</label><input id="cmf-cmd" placeholder="ss -tlnp" style="font-family:var(--mono)"/></div>
+    <div class="mfl"><label>Description</label><input id="cmf-desc" placeholder="What does this do?"/></div>
+    <div class="mfl-row">
+      <div class="mfl"><label>Category</label><select id="cmf-cat"><option value="network">Network</option><option value="logs">Logs</option><option value="forensics">Forensics</option><option value="system">System</option><option value="threat-hunting">Threat Hunting</option><option value="general">General</option></select></div>
+      <div class="mfl"><label>Tags (comma separated)</label><input id="cmf-tags" placeholder="ssh,auth"/></div>
+    </div>
+    <div class="ma"><button class="btn-cancel" onclick="closeCmdModal()">Cancel</button><button class="btn btn-cyan" onclick="saveCmd()">Save Command</button></div>
+  </div>
+</div>
+
+<div class="mo" id="user-modal">
+  <div class="modal">
+    <h3>Add User</h3>
+    <div class="mfl"><label>Username</label><input id="uf-n" placeholder="username"/></div>
+    <div class="mfl"><label>Email</label><input id="uf-e" placeholder="user@example.com"/></div>
+    <div class="mfl-row">
+      <div class="mfl"><label>Role</label><select id="uf-r"><option value="analyst">Analyst</option><option value="admin">Admin</option></select></div>
+      <div class="mfl"><label>Password</label><input type="password" id="uf-p" placeholder="••••••••"/></div>
+    </div>
+    <div class="ma"><button class="btn-cancel" onclick="closeUserModal()">Cancel</button><button class="btn btn-cyan" onclick="saveUser()">Create User</button></div>
+  </div>
+</div>
+
+<div id="snack"></div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const ago = m => new Date(Date.now() - m*60000).toISOString();
+
+let ALERTS = [
+  {id:'A001',timestamp:ago(5),   rule_name:'ET MALWARE Cobalt Strike Beacon',        severity:'critical',source_ip:'203.0.113.42', dest_ip:'10.0.0.55',   protocol:'HTTPS',   category:'Malware',          message:'Cobalt Strike beacon C2 communication over HTTPS. Traffic matches known CS watermark pattern — likely active C2 channel. Recommend immediate isolation of affected host.',count:3,  status:'open',         geo:'🇷🇺 Russia',     mitre:['T1071.001','T1573'],   asn:'AS196695',country:'Russia'},
+  {id:'A002',timestamp:ago(12),  rule_name:'ET TROJAN Emotet CnC Beacon',            severity:'critical',source_ip:'10.0.0.31',    dest_ip:'91.121.87.45',protocol:'TCP',     category:'Trojan Activity',  message:'Emotet trojan C2 beacon from internal host 10.0.0.31. Host appears compromised and actively phoning home to a known C2 infrastructure. Collect memory image.',       count:22, status:'investigating', geo:'🇫🇷 France',    mitre:['T1059','T1027'],        asn:'AS16276',country:'France'},
+  {id:'A003',timestamp:ago(45),  rule_name:'ET EXPLOIT Apache Log4j RCE',            severity:'critical',source_ip:'198.51.100.77',dest_ip:'10.0.0.5',    protocol:'HTTP',    category:'Exploit',          message:'Log4Shell (CVE-2021-44228) attempt in HTTP User-Agent headers. JNDI lookup string detected targeting vulnerable log4j instance on web server.',  count:8,  status:'resolved',     geo:'🇨🇳 China',     mitre:['T1190','T1203'],        asn:'AS4134',country:'China'},
+  {id:'A004',timestamp:ago(5),   rule_name:'ET SCAN SSH BruteForce Login',           severity:'high',    source_ip:'185.220.101.5',dest_ip:'10.0.0.1',    protocol:'TCP/22',  category:'Brute Force',      message:'892 SSH login attempts from known Tor exit node in under 5 minutes. Targeting root, admin, and ubuntu accounts. Recommend immediate firewall block.',   count:892,status:'open',         geo:'🇩🇪 Tor Exit',  mitre:['T1110.001'],            asn:'TorProject',country:'Germany'},
+  {id:'A005',timestamp:ago(8),   rule_name:'ET SCAN Nmap OS Detection',              severity:'high',    source_ip:'192.168.1.45', dest_ip:'10.0.0.1',    protocol:'TCP',     category:'Reconnaissance',   message:'Nmap OS detection sweep from internal host 192.168.1.45. Possible insider threat, compromised workstation, or unauthorized pen test conducting network reconnaissance.',       count:47, status:'open',         geo:'🏠 Internal',   mitre:['T1046','T1018'],        asn:'Internal',country:'Internal'},
+  {id:'A006',timestamp:ago(240), rule_name:'ET CURRENT_EVENTS Phishing Kit',        severity:'high',    source_ip:'10.0.0.145',   dest_ip:'104.21.55.200',protocol:'HTTPS',  category:'Social Engineering',message:'User navigated to a phishing kit mimicking Microsoft 365 login. Credentials may be compromised. Quarantine host and force password reset immediately.',          count:1,  status:'investigating', geo:'🇺🇸 Cloudflare',mitre:['T1566.002','T1078'],    asn:'AS13335',country:'USA'},
+  {id:'A007',timestamp:ago(28),  rule_name:'GPL SQL sa login failed',                severity:'medium',  source_ip:'10.0.0.88',    dest_ip:'10.0.0.20',   protocol:'TCP',     category:'Info Leak Attempt', message:'134 failed SQL Server SA login attempts. Possible SQLmap automated injection tool scanning MSSQL instance on 10.0.0.20. Review SQL Server logs.',              count:134,status:'investigating', geo:'🏠 Internal',   mitre:['T1110.002','T1190'],    asn:'Internal',country:'Internal'},
+  {id:'A008',timestamp:ago(120), rule_name:'ET DNS Query Suspicious TLD .xyz',       severity:'medium',  source_ip:'10.0.0.73',    dest_ip:'8.8.8.8',     protocol:'DNS',     category:'DNS',              message:'DNS query to recently-registered .xyz domain found in threat intelligence feeds as a malware distribution and C2 point.',               count:5,  status:'open',         geo:'🌐 Google DNS', mitre:['T1568','T1071.004'],    asn:'AS15169',country:'USA'},
+  {id:'A009',timestamp:ago(190), rule_name:'ET POLICY RDP Connection Attempt',       severity:'medium',  source_ip:'203.0.113.15', dest_ip:'10.0.0.50',   protocol:'TCP/3389',category:'Policy Violation', message:'Inbound RDP attempt from external IP. RDP should never be directly internet-exposed per security policy. Block at perimeter firewall and investigate source.',           count:17, status:'open',         geo:'🇧🇷 Brazil',    mitre:['T1021.001'],            asn:'AS26615',country:'Brazil'},
+  {id:'A010',timestamp:ago(45),  rule_name:'ET POLICY Suspicious UA curl',           severity:'low',     source_ip:'10.0.0.102',   dest_ip:'93.184.216.34',protocol:'HTTP',   category:'Policy Violation', message:'Curl user-agent string making repeated HTTP requests to external host. May indicate automated script exfiltration, malware dropper, or policy violation.',  count:12, status:'open',         geo:'🇺🇸 Akamai',    mitre:['T1105','T1071.001'],    asn:'AS20940',country:'USA'},
+  {id:'A011',timestamp:ago(180), rule_name:'ET WEB_SERVER PHP Easter Egg',           severity:'low',     source_ip:'10.0.0.200',   dest_ip:'10.0.0.10',   protocol:'HTTP',    category:'Web Attack',       message:'PHP Easter Egg disclosure attempt via ?=PHPE9568F36. This typically indicates automated web application scanning or vulnerability assessment activity.',             count:2,  status:'resolved',     geo:'🏠 Internal',   mitre:['T1595.003'],            asn:'Internal',country:'Internal'},
+  {id:'A012',timestamp:ago(300), rule_name:'GPL ICMP PING Sweep NIX',                severity:'low',     source_ip:'10.0.0.1',     dest_ip:'10.0.0.0/24', protocol:'ICMP',    category:'Misc Activity',    message:'ICMP ping sweep across /24 subnet from gateway. Likely routine network monitoring or host discovery. Verify with network team before dismissing.',    count:254,status:'resolved',     geo:'🏠 Internal',   mitre:['T1018'],                asn:'Internal',country:'Internal'},
+];
+
+let NOTES = {};
+let alertSortField = 'timestamp', alertSortDir = 'desc';
+
+let COMMANDS = [
+  {id:1,title:'Active Connections',    command:'ss -tunap',description:'Show all active TCP/UDP connections with PID and process name',category:'network',    tags:'network,connections,ss'},
+  {id:2,title:'Listening Ports',       command:'ss -tlnp', description:'List all listening TCP ports with associated process names', category:'network',    tags:'network,ports,listening'},
+  {id:3,title:'Auth Failures',         command:"sudo tail -n 100 /var/log/auth.log | grep -i 'failed\\|invalid\\|error'",description:'Check for recent authentication failures in auth.log',category:'logs',tags:'auth,logs,ssh'},
+  {id:4,title:'Find SUID Files',       command:'find / -perm -4000 -type f 2>/dev/null',description:'Locate all SUID binaries — privilege escalation check',category:'forensics',tags:'suid,privesc,forensics'},
+  {id:5,title:'Top CPU Processes',     command:'ps aux --sort=-%cpu | head -20',description:'Show 20 most CPU-consuming processes',category:'system',tags:'processes,cpu,monitoring'},
+  {id:6,title:'Capture Traffic',       command:"sudo tcpdump -i any -nn -v 'not port 22' -w /tmp/cap.pcap",description:'Capture all traffic except SSH into a pcap file',category:'network',tags:'tcpdump,pcap,capture'},
+  {id:7,title:'Search Logs for IOC',   command:"grep -rn 'IOC_HERE' /var/log/ 2>/dev/null",description:'Search all log files for a specific indicator of compromise',category:'threat-hunting',tags:'ioc,grep,logs'},
+  {id:8,title:'All Cron Jobs',         command:"for u in $(cut -f1 -d: /etc/passwd); do crontab -u $u -l 2>/dev/null|grep -v '^#'|sed \"s/^/$u: /\"; done",description:'List cron jobs for all users — persistence check',category:'forensics',tags:'cron,persistence'},
+  {id:9,title:'Connections to IP',     command:'netstat -anp | grep ESTABLISHED | grep $SUSPECT_IP',description:'All established connections to a suspected IP address',category:'network',tags:'netstat,hunting,connections'},
+  {id:10,title:'Process Memory Strings',command:'strings -n 10 /proc/$PID/mem 2>/dev/null | grep -Ei "http|base64|cmd"',description:'Extract strings from process memory for malware analysis',category:'forensics',tags:'memory,strings,malware'},
+  {id:11,title:'Volatility Memory Dump',command:'vol.py -f /tmp/mem.raw --profile=Win10x64 malfind',description:'Run Volatility malfind plugin to detect injected code',category:'forensics',tags:'volatility,memory,malware'},
+  {id:12,title:'Yara Scan Directory',  command:'yara -r /opt/yara-rules/ /proc/',description:'Scan running processes with YARA rules for malware detection',category:'threat-hunting',tags:'yara,scan,malware'},
+];
+let cmdId = 13;
+
+let USERS = [
+  {id:1,username:'admin',   email:'admin@shallot.demo',   role:'admin',   status:'active',lastLogin:'Just now',  created:'2024-01-15'},
+  {id:2,username:'analyst1',email:'analyst1@shallot.demo',role:'analyst', status:'active',lastLogin:'2h ago',    created:'2024-02-03'},
+  {id:3,username:'jdoe',    email:'j.doe@shallot.demo',   role:'analyst', status:'active',lastLogin:'1d ago',    created:'2024-03-10'},
+  {id:4,username:'soc_lead',email:'soc@shallot.demo',     role:'admin',   status:'active',lastLogin:'3h ago',    created:'2024-01-20'},
+  {id:5,username:'ir_team', email:'ir@shallot.demo',      role:'analyst', status:'active',lastLogin:'5h ago',    created:'2024-04-01'},
+];
+let userId = 6;
+
+let LOGS = [
+  {time:ago(2),   action:'login',         user:'admin',    detail:'Successful authentication from 127.0.0.1'},
+  {time:ago(18),  action:'alert_note',    user:'analyst1', detail:'Added note to alert A002: Emotet IOC confirmed'},
+  {time:ago(35),  action:'status_change', user:'analyst1', detail:'Alert A003 marked resolved — patched CVE-2021-44228'},
+  {time:ago(120), action:'cmd_create',    user:'admin',    detail:'Created: Process Memory Strings'},
+  {time:ago(240), action:'status_change', user:'soc_lead', detail:'Alert A006 moved to investigating'},
+  {time:ago(480), action:'login',         user:'soc_lead', detail:'Successful authentication from 10.0.0.15'},
+  {time:ago(1440),action:'user_create',   user:'admin',    detail:'Created user: ir_team'},
+  {time:ago(2880),action:'config',        user:'admin',    detail:'Updated CORS origins — added localhost:5173'},
+];
+
+// STATE
+let sbCollapsed=false, curAlertId=null, curUser='admin', curRole='admin';
+let feedData=[], feedInterval, clockInterval, snackTimer;
+let isDark=true;
+
+// ═══════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════
+function quickLogin(u,p){
+  document.getElementById('lu').value=u;
+  document.getElementById('lp').value=p;
+  doLogin();
+}
+function doLogin(){
+  const u=document.getElementById('lu').value.trim();
+  const p=document.getElementById('lp').value;
+  if(!u||!p){showSnack('Enter credentials','err');return;}
+  curUser=u;
+  const found=USERS.find(x=>x.username===u);
+  // Map username to role: soc_lead user has admin role in USERS but we want 'soc_lead' persona
+  if(u==='soc_lead') curRole='soc_lead';
+  else curRole=found?found.role:'analyst';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('uname').textContent=u;
+  document.getElementById('uavatar').textContent=u[0].toUpperCase();
+  document.getElementById('urole').textContent=curRole.toUpperCase();
+  LOGS.unshift({time:new Date().toISOString(),action:'login',user:u,detail:'Successful authentication'});
+  initApp();
+}
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  clearInterval(clockInterval);clearInterval(feedInterval);
+}
+function initApp(){
+  applyRoleUI();
+  renderAll();
+  startClock();
+  buildTicker();
+  // Charts live inside role-dashboard HTML — must render AFTER renderRoleDashboard
+  buildChart();
+  buildHeatmap();
+  buildCatBars();
+  startFeed();
+  populateCatFilter();
+  const greet={admin:'Full system access granted 👑',soc_lead:'SOC Lead view loaded 🛡️',analyst:'Analyst workspace ready 🔍'}[curRole]||'Welcome 👋';
+  showSnack(greet,'ok');
+}
+
+// ═══════════════════════════════════════
+// ROLE-BASED UI
+// ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// ROLE CONFIGURATION
+// ═══════════════════════════════════════
+const ROLE_CONFIG = {
+  admin: {
+    color:'var(--yellow)', border:'rgba(255,215,64,.5)',
+    avatarBg:'linear-gradient(135deg,rgba(255,215,64,.25),rgba(255,215,64,.05))',
+    label:'ADMINISTRATOR', badge:'👑',
+    accentCSS:'color:var(--yellow)',
+    nav:[
+      {section:'Monitor'},
+      {id:'dashboard', icon:'📊', label:'Dashboard'},
+      {id:'alerts',    icon:'🔔', label:'Alerts',   badge:true},
+      {id:'timeline',  icon:'📅', label:'Timeline'},
+      {section:'Tools'},
+      {id:'commands',  icon:'⌨️',  label:'Commands'},
+      {section:'System'},
+      {id:'admin',     icon:'⚙️',  label:'Admin Panel'},
+    ]
+  },
+  soc_lead: {
+    color:'var(--green)', border:'rgba(0,230,118,.45)',
+    avatarBg:'linear-gradient(135deg,rgba(0,230,118,.25),rgba(0,230,118,.05))',
+    label:'SOC LEAD', badge:'🛡️',
+    accentCSS:'color:var(--green)',
+    nav:[
+      {section:'Monitor'},
+      {id:'dashboard', icon:'📊', label:'Dashboard'},
+      {id:'alerts',    icon:'🔔', label:'Alerts',   badge:true},
+      {id:'reports',   icon:'📑', label:'Reports'},
+      {id:'timeline',  icon:'📅', label:'Timeline'},
+      {section:'Tools'},
+      {id:'commands',  icon:'⌨️',  label:'Commands'},
+    ]
+  },
+  analyst: {
+    color:'var(--cyan)', border:'rgba(0,212,255,.35)',
+    avatarBg:'linear-gradient(135deg,rgba(0,212,255,.2),rgba(0,212,255,.05))',
+    label:'ANALYST', badge:'🔍',
+    accentCSS:'color:var(--cyan)',
+    nav:[
+      {section:'My Work'},
+      {id:'dashboard', icon:'📊', label:'Dashboard'},
+      {id:'mycases',   icon:'📁', label:'My Cases',  badge:true},
+      {id:'alerts',    icon:'🔔', label:'All Alerts'},
+      {section:'Tools'},
+      {id:'commands',  icon:'⌨️',  label:'Commands'},
+      {id:'timeline',  icon:'📅', label:'Timeline'},
+    ]
+  }
+};
+
+function applyRoleUI(){
+  const cfg = ROLE_CONFIG[curRole] || ROLE_CONFIG.analyst;
+
+  // Avatar styling
+  const av=document.getElementById('uavatar');
+  if(av){av.style.background=cfg.avatarBg;av.style.borderColor=cfg.border;}
+
+  // Role label color
+  const rb=document.getElementById('urole');
+  if(rb){rb.style.cssText=cfg.accentCSS;rb.textContent=cfg.label;}
+
+  // Render sidebar nav
+  buildNav(cfg);
+
+  // Export button — hide for analyst
+  const expBtn=document.querySelector('.export-btn');
+  if(expBtn) expBtn.style.display=(curRole==='analyst')?'none':'';
+
+  // Keyboard hint
+  const hintMap={
+    admin:   '<kbd>1</kbd>dash <kbd>2</kbd>alerts <kbd>3</kbd>timeline <kbd>4</kbd>cmds <kbd>5</kbd>admin',
+    soc_lead:'<kbd>1</kbd>dash <kbd>2</kbd>alerts <kbd>3</kbd>reports <kbd>4</kbd>timeline <kbd>5</kbd>cmds',
+    analyst: '<kbd>1</kbd>dash <kbd>2</kbd>queue <kbd>3</kbd>alerts <kbd>4</kbd>cmds &nbsp;<kbd>[</kbd>sidebar',
+  };
+  const hint=document.getElementById('kbdhint');
+  if(hint)hint.innerHTML=(hintMap[curRole]||hintMap.admin);
+
+  // Alerts page — role-specific header + banner
+  applyAlertsRoleUI();
+
+  // Commands page header
+  applyCommandsRoleUI();
+
+  // Timeline page
+  applyTimelineRoleUI();
+
+  // Reports page (SOC Lead only)
+  if(curRole==='soc_lead') renderReportsPage();
+
+  // My Cases page (Analyst only)
+  if(curRole==='analyst') renderMyCasesPage();
+}
+
+function buildNav(cfg){
+  const nav = document.getElementById('sidebar-nav');
+  if(!nav)return;
+  nav.innerHTML = cfg.nav.map(item=>{
+    if(item.section) return `<div class="nav-section-label" style="margin-top:8px">${item.section}</div>`;
+    const badgeHtml = item.badge ? `<span class="nav-badge" id="abadge">${ALERTS.filter(a=>a.status!=='resolved').length}</span>` : '';
+    const activeClass = item.id==='dashboard' ? ' active' : '';
+    return `<div class="nav-item${activeClass}" id="n-${item.id}" onclick="showPage('${item.id}',this)"><span class="nav-icon">${item.icon}</span><span class="nav-label">${item.label}</span>${badgeHtml}</div>`;
+  }).join('');
+}
+
+function applyAlertsRoleUI(){
+  // Title + subtitle
+  const t=document.getElementById('alerts-page-title');
+  const s=document.getElementById('alerts-page-sub');
+  const acts=document.getElementById('alerts-page-actions');
+  const banner=document.getElementById('alerts-role-banner');
+  if(!t)return;
+
+  if(curRole==='admin'){
+    t.textContent='All Security Alerts';
+    s.textContent='Full system visibility — all Suricata / Snort rules';
+    if(acts) acts.innerHTML=`<button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button><button class="btn btn-cyan" onclick="showPage('admin',document.getElementById('n-admin'))">⚙ Admin →</button>`;
+    if(banner) banner.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,215,64,.06);border:1px solid rgba(255,215,64,.15);border-radius:var(--r);margin-bottom:14px;font-size:12px"><span style="font-size:18px">👑</span><span style="color:var(--yellow);font-weight:700">Admin view</span><span style="color:var(--text2)">— full read/write access to all alerts, status changes, and exports</span></div>`;
+  } else if(curRole==='soc_lead'){
+    t.textContent='Alert Queue';
+    s.textContent='SOC Lead view — team escalations and SLA tracking';
+    if(acts) acts.innerHTML=`<button class="btn btn-ghost" onclick="exportCSV()">⬇ Export CSV</button><button class="btn btn-cyan" onclick="showPage('reports',document.getElementById('n-reports'))">📑 Reports →</button>`;
+    if(banner) banner.innerHTML=`<div style="display:flex;gap:14px;margin-bottom:14px">
+      <div style="flex:1;padding:10px 14px;background:rgba(255,61,87,.07);border:1px solid rgba(255,61,87,.2);border-radius:var(--r);font-size:12px">
+        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Needs Escalation</div>
+        <div style="font-size:22px;font-weight:900;font-family:var(--mono);color:var(--red)">${ALERTS.filter(a=>a.severity==='critical'&&a.status==='open').length}</div>
+      </div>
+      <div style="flex:1;padding:10px 14px;background:rgba(255,215,64,.07);border:1px solid rgba(255,215,64,.2);border-radius:var(--r);font-size:12px">
+        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">In Progress</div>
+        <div style="font-size:22px;font-weight:900;font-family:var(--mono);color:var(--yellow)">${ALERTS.filter(a=>a.status==='investigating').length}</div>
+      </div>
+      <div style="flex:1;padding:10px 14px;background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);border-radius:var(--r);font-size:12px">
+        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Resolved</div>
+        <div style="font-size:22px;font-weight:900;font-family:var(--mono);color:var(--green)">${ALERTS.filter(a=>a.status==='resolved').length}</div>
+      </div>
+      <div style="flex:1;padding:10px 14px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.2);border-radius:var(--r);font-size:12px">
+        <div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">SLA Breach Risk</div>
+        <div style="font-size:22px;font-weight:900;font-family:var(--mono);color:var(--cyan)">${ALERTS.filter(a=>a.severity==='critical'||a.severity==='high').length}</div>
+      </div>
+    </div>`;
+  } else {
+    // Analyst
+    t.textContent='Alert Feed';
+    s.textContent='Your assigned alerts — investigate and add notes';
+    if(acts) acts.innerHTML=`<button class="btn btn-ghost" onclick="showPage('mycases',document.getElementById('n-mycases'))">📁 My Cases →</button>`;
+    if(banner) banner.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);border-radius:var(--r);margin-bottom:14px;font-size:12px"><span style="font-size:16px">💡</span><span style="color:var(--cyan);font-weight:700">Analyst tip:</span><span style="color:var(--text2)">Click <b style="color:var(--text)">Investigate →</b> on any alert to add notes, change status, and run quick commands.</span><button class="btn btn-ghost" style="margin-left:auto;font-size:11px;padding:4px 8px" onclick="document.getElementById('astat').value='open';renderAlerts()">Show Open Only</button></div>`;
+  }
+}
+
+function applyCommandsRoleUI(){
+  const hdr=document.getElementById('commands-page-header');
+  if(!hdr)return;
+  if(curRole==='admin'){
+    hdr.innerHTML=`<div class="ph"><div><h1>Command Library</h1><p>Full library — create, edit, delete any command</p></div><button class="btn btn-cyan" onclick="openCmdModal()">+ New Command</button></div>`;
+  } else if(curRole==='soc_lead'){
+    hdr.innerHTML=`<div class="ph"><div><h1>Command Library</h1><p>SOC-approved commands — add team-wide commands</p></div><button class="btn btn-cyan" onclick="openCmdModal()">+ Add Command</button></div>
+    <div style="padding:10px 14px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:var(--r);margin-bottom:14px;font-size:12px;color:var(--text2)">🛡️ <b style="color:var(--green)">SOC Lead:</b> Commands you add are shared with your analyst team.</div>`;
+  } else {
+    hdr.innerHTML=`<div class="ph"><div><h1>Command Library</h1><p>Copy and run commands during investigations</p></div></div>
+    <div style="padding:10px 14px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);border-radius:var(--r);margin-bottom:14px;font-size:12px;color:var(--text2)">🔍 <b style="color:var(--cyan)">Analyst tip:</b> Search by IP, technique, or tool name. Click <b style="color:var(--text)">copy</b> to copy any command to clipboard instantly.</div>`;
+  }
+}
+
+function applyTimelineRoleUI(){
+  const el=document.getElementById('timeline-page-content');
+  if(!el)return;
+  const sorted=[...ALERTS].sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+  const dot={critical:'tc',high:'th',medium:'tm',low:'tl'};
+
+  let intro='';
+  if(curRole==='admin'){
+    intro=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(255,215,64,.06);border:1px solid rgba(255,215,64,.15);border-radius:var(--r);margin-bottom:14px;font-size:12px"><span>👑</span><span style="color:var(--yellow);font-weight:700">Admin Timeline</span><span style="color:var(--text2)">— full audit trail, all events, all users</span><button class="btn btn-ghost" style="margin-left:auto;font-size:11px;padding:4px 8px" onclick="exportCSV()">⬇ Export</button></div>`;
+  } else if(curRole==='soc_lead'){
+    intro=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:var(--r);margin-bottom:14px;font-size:12px"><span>🛡️</span><span style="color:var(--green);font-weight:700">SOC Lead Timeline</span><span style="color:var(--text2)">— track team response times and escalation flow</span></div>`;
+  } else {
+    intro=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);border-radius:var(--r);margin-bottom:14px;font-size:12px"><span>🔍</span><span style="color:var(--cyan);font-weight:700">Analyst Timeline</span><span style="color:var(--text2)">— your alert investigation history</span></div>`;
+  }
+
+  el.innerHTML=`
+  ${intro}
+  <div class="ph"><div><h1>Threat Timeline</h1><p>Chronological view of all security events</p></div></div>
+  <div class="card">
+    <div class="card-hd"><span class="ci">📅</span> Event Timeline <span class="cc">${sorted.length} events</span></div>
+    <div class="card-body">
+      <div class="timeline-wrap" id="timeline-list">
+        <div class="tl-line"></div>
+        ${sorted.map(a=>`
+        <div class="timeline-item">
+          <div class="tl-dot ${dot[a.severity]||'tl'}"></div>
+          <div class="tl-body">
+            <div class="tl-rule">${a.rule_name}</div>
+            <div class="tl-meta">
+              <span>${rel(a.timestamp)}</span>
+              ${sevChip(a.severity)}
+              ${stChip(a.status)}
+              <span class="ip">${a.source_ip} → ${a.dest_ip}</span>
+              <span style="font-size:10px">${a.geo||''}</span>
+            </div>
+            <div style="font-size:11px;color:var(--text2);margin-top:4px;line-height:1.5">${a.message.substring(0,130)}${a.message.length>130?'...':''}</div>
+            <div style="margin-top:6px"><button class="act" style="font-size:10px;padding:3px 8px" onclick="openDetail('${a.id}')">Details →</button></div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── REPORTS PAGE (SOC Lead only) ────────────────────
+function renderReportsPage(){
+  const el=document.getElementById('reports-content');
+  if(!el)return;
+  const sev={critical:0,high:0,medium:0,low:0};
+  ALERTS.forEach(a=>sev[a.severity]++);
+  const mttr=Math.floor(Math.random()*30)+15;
+  el.innerHTML=`
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+    <div class="card" style="padding:16px 18px"><div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--cyan)">${ALERTS.length}</div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px">Total Alerts</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">This shift</div></div>
+    <div class="card" style="padding:16px 18px"><div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--green)">${ALERTS.filter(a=>a.status==='resolved').length}</div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px">Resolved</div><div style="font-size:10px;color:var(--green);font-family:var(--mono)">↑ 33% vs last shift</div></div>
+    <div class="card" style="padding:16px 18px"><div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--yellow)">${mttr}min</div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px">Avg MTTR</div><div style="font-size:10px;color:var(--yellow);font-family:var(--mono)">Mean time to resolve</div></div>
+    <div class="card" style="padding:16px 18px"><div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--red)">${ALERTS.filter(a=>a.severity==='critical'&&a.status==='open').length}</div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px">SLA Breach Risk</div><div style="font-size:10px;color:var(--red);font-family:var(--mono)">Critical + open</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-hd"><span class="ci">👥</span> Analyst Performance This Shift</div>
+      <div class="card-body" style="padding:12px">
+        ${USERS.filter(u=>u.role==='analyst').map(u=>{
+          const resolved=Math.floor(Math.random()*3);
+          const investigating=Math.floor(Math.random()*2);
+          return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+            <div style="width:28px;height:28px;border-radius:7px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--cyan)">${u.username[0].toUpperCase()}</div>
+            <div style="flex:1"><div style="font-size:12px;font-weight:600">${u.username}</div><div style="font-size:10px;color:var(--text2);font-family:var(--mono)">Last active: ${u.lastLogin}</div></div>
+            <div style="text-align:right"><div style="font-size:12px;font-family:var(--mono);color:var(--green)">${resolved} resolved</div><div style="font-size:10px;color:var(--yellow);font-family:var(--mono)">${investigating} investigating</div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ci">🚨</span> Escalation Required</div>
+      <div class="card-body" style="padding:10px">
+        ${ALERTS.filter(a=>a.severity==='critical'&&a.status==='open').map(a=>`
+          <div style="display:flex;align-items:center;gap:8px;padding:8px;background:rgba(255,61,87,.07);border:1px solid rgba(255,61,87,.18);border-radius:var(--r);margin-bottom:6px">
+            <span style="width:7px;height:7px;background:var(--red);border-radius:50%;animation:blink 1s infinite;box-shadow:0 0 6px var(--red);flex-shrink:0"></span>
+            <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.rule_name}</div><div style="font-size:10px;color:var(--text2);font-family:var(--mono)">${a.source_ip} · ${rel(a.timestamp)}</div></div>
+            <button class="act" style="font-size:10px;padding:3px 7px" onclick="changeStatus('${a.id}','investigating');showPage('alerts',document.getElementById('n-alerts'))">Assign</button>
+          </div>`).join('')||'<div class="empty-state" style="padding:20px"><div class="ei">✅</div>No escalations needed</div>'}
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="ci">📊</span> Shift Summary — Alert Breakdown by Severity</div>
+    <div class="card-body">
+      ${Object.entries(sev).map(([s,n])=>{
+        const colors={critical:'var(--red)',high:'var(--yellow)',medium:'var(--orange)',low:'var(--green)'};
+        const pct=Math.round((n/ALERTS.length)*100);
+        return `<div class="cat-row"><div class="cat-name" style="font-weight:600;color:${colors[s]}">${s.charAt(0).toUpperCase()+s.slice(1)}</div><div class="bar-track" style="height:8px"><div class="bar-fill" style="width:${pct}%;background:${colors[s]}"></div></div><div class="cat-count">${n}</div></div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+// ─── MY CASES PAGE (Analyst only) ────────────────────
+function renderMyCasesPage(){
+  const el=document.getElementById('mycases-content');
+  if(!el)return;
+  const myAlerts=ALERTS.filter(a=>a.status==='open'||a.status==='investigating');
+  const noteCount=Object.values(NOTES).reduce((t,n)=>t+n.length,0);
+  el.innerHTML=`
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+    <div class="card" style="padding:16px 18px;border-top:2px solid var(--orange)"><div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--orange)">${ALERTS.filter(a=>a.status==='open').length}</div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px">Open — needs review</div></div>
+    <div class="card" style="padding:16px 18px;border-top:2px solid var(--yellow)"><div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--yellow)">${ALERTS.filter(a=>a.status==='investigating').length}</div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px">Investigating now</div></div>
+    <div class="card" style="padding:16px 18px;border-top:2px solid var(--purple)"><div style="font-size:32px;font-weight:900;font-family:var(--mono);color:var(--purple)">${noteCount}</div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-top:4px">Notes written</div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-hd"><span class="ci">📁</span> Active Cases <span class="cc">${myAlerts.length} cases</span></div>
+    <div class="card-body" style="padding:10px">
+      ${myAlerts.length?myAlerts.map(a=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-left:3px solid ${a.severity==='critical'?'var(--red)':a.severity==='high'?'var(--yellow)':a.severity==='medium'?'var(--orange)':'var(--green)'};border-radius:0 var(--r) var(--r) 0;margin-bottom:8px;transition:var(--tr)" onmouseover="this.style.borderColor=a.severity==='critical'?'var(--red)':'var(--cyan)'" onmouseout="this.style.borderColor='var(--border)'">
+          ${sevChip(a.severity)}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.rule_name}</div>
+            <div style="font-size:10px;color:var(--text2);font-family:var(--mono);margin-top:2px">${a.source_ip} → ${a.dest_ip} · ${rel(a.timestamp)} · ${a.geo||''}</div>
+            ${NOTES[a.id]&&NOTES[a.id].length?`<div style="font-size:10px;color:var(--purple);margin-top:3px;font-family:var(--mono)">📝 ${NOTES[a.id].length} note${NOTES[a.id].length>1?'s':''} added</div>`:''}
+          </div>
+          ${stChip(a.status)}
+          <div style="display:flex;gap:6px">
+            <button class="stt stt-inv" style="font-size:10px;padding:3px 8px" onclick="changeStatus('${a.id}','investigating')">Investigate</button>
+            <button class="stt stt-res" style="font-size:10px;padding:3px 8px" onclick="changeStatus('${a.id}','resolved')">Resolve</button>
+            <button class="act" style="font-size:10px;padding:3px 8px;color:var(--cyan);border-color:rgba(0,212,255,.3)" onclick="openDetail('${a.id}')">Notes →</button>
+          </div>
+        </div>`).join(''):`<div class="empty-state"><div class="ei">🎉</div>All cases resolved! Great work.</div>`}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="ci">✅</span> Recently Resolved</div>
+    <div class="card-body" style="padding:10px">
+      ${ALERTS.filter(a=>a.status==='resolved').map(a=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:rgba(0,230,118,.04);border:1px solid rgba(0,230,118,.12);border-radius:var(--r);margin-bottom:5px;opacity:.8">
+          <span style="font-size:12px">✅</span>
+          <div style="flex:1;font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.rule_name}</div>
+          <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">${rel(a.timestamp)}</span>
+          <button class="act" style="font-size:10px;padding:2px 7px" onclick="openDetail('${a.id}')">View</button>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderRoleDashboard(){
+  const el=document.getElementById('role-dashboard-panel');
+  if(!el)return;
+  if(curRole==='admin')         el.innerHTML=buildAdminDash();
+  else if(curRole==='soc_lead') el.innerHTML=buildSocDash();
+  else                          el.innerHTML=buildAnalystDash();
+}
+
+// ─── ADMIN FULL DASHBOARD ────────────────────────────
+function buildAdminDash(){
+  const cnt={critical:0,high:0,medium:0,low:0};
+  ALERTS.forEach(a=>cnt[a.severity]++);
+  const total=ALERTS.length;
+  const circ=2*Math.PI*48;
+  let off=0;
+  const segs=[{c:'var(--red)',v:cnt.critical},{c:'var(--yellow)',v:cnt.high},{c:'var(--orange)',v:cnt.medium},{c:'var(--green)',v:cnt.low}];
+  const segHtml=segs.map(s=>{const len=(s.v/total)*circ;const h=`<circle cx="60" cy="60" r="48" fill="none" stroke="${s.c}" stroke-width="14" stroke-dasharray="${len} ${circ}" stroke-dashoffset="${-off}" stroke-linecap="round"/>`;off+=len;return h;}).join('');
+
+  return `
+  <div style="background:linear-gradient(135deg,rgba(255,215,64,.06),transparent);border:1px solid rgba(255,215,64,.15);border-radius:var(--r2);padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px">
+    <span style="font-size:28px">👑</span>
+    <div><div style="font-size:16px;font-weight:900;color:var(--yellow)">Administrator Dashboard</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">Full system control · all data · user management · integrations</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn btn-ghost" style="font-size:11px" onclick="exportCSV()">⬇ Export CSV</button>
+      <button class="btn btn-cyan" style="font-size:11px" onclick="showPage('admin',document.getElementById('n-admin'))">⚙ Admin Panel →</button>
+    </div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-card c-all"><div class="stat-icon">🔔</div><div class="stat-num" id="s-total">${total}</div><div class="stat-label">Total Alerts</div><div class="stat-delta">Last 24h</div><div class="stat-trend trend-up">▲ 4</div></div>
+    <div class="stat-card c-crit"><div class="stat-icon">🚨</div><div class="stat-num" id="s-crit">${cnt.critical}</div><div class="stat-label">Critical</div><div class="stat-delta">Immediate action</div><div class="stat-trend trend-up">▲ 1</div></div>
+    <div class="stat-card c-high"><div class="stat-icon">⚠️</div><div class="stat-num" id="s-high">${cnt.high}</div><div class="stat-label">High</div><div class="stat-delta">Review soon</div><div class="stat-trend trend-dn">▼ 2</div></div>
+    <div class="stat-card c-open"><div class="stat-icon">🔓</div><div class="stat-num" id="s-open">${ALERTS.filter(a=>a.status==='open').length}</div><div class="stat-label">Open</div><div class="stat-delta">Unresolved</div><div class="stat-trend trend-up">▲ 3</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 240px;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-hd"><span class="ci">📈</span> Alert Activity — Last 24h <span class="cc" id="chart-lbl">0 events</span></div>
+      <div class="card-body">
+        <div class="mini-bars" id="hourly-chart"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--text3);font-family:var(--mono)"><span>24h ago</span><span>18h</span><span>12h</span><span>6h</span><span>now</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ci">🍩</span> Severity</div>
+      <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:10px">
+        <div class="donut-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120" style="transform:rotate(-90deg)">${segHtml}</svg>
+          <div class="donut-center"><div class="donut-num" id="donut-total">${total}</div><div class="donut-lbl">alerts</div></div>
+        </div>
+        <div style="width:100%;font-size:11px;line-height:2.2">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border)"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:var(--red);display:inline-block"></span>Critical</span><b style="font-family:var(--mono);color:var(--red)" id="dl-c">${cnt.critical}</b></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border)"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:var(--yellow);display:inline-block"></span>High</span><b style="font-family:var(--mono);color:var(--yellow)" id="dl-h">${cnt.high}</b></div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border)"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:var(--orange);display:inline-block"></span>Medium</span><b style="font-family:var(--mono);color:var(--orange)" id="dl-m">${cnt.medium}</b></div>
+          <div style="display:flex;justify-content:space-between"><span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>Low</span><b style="font-family:var(--mono);color:var(--green)" id="dl-l">${cnt.low}</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 300px;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-hd"><span class="ci">📂</span> Categories</div>
+      <div class="card-body" id="cat-bars"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ci">⚡</span> Live Alert Feed <span class="cc">auto-refresh</span></div>
+      <div class="card-body" style="padding:10px"><div id="live-feed" style="max-height:240px;overflow-y:auto"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ci">👥</span> Users &amp; System</div>
+      <div class="card-body" style="padding:12px">
+        <div style="font-size:11px;margin-bottom:10px">${USERS.map(u=>`<div style="display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="width:22px;height:22px;border-radius:6px;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:var(--cyan)">${u.username[0].toUpperCase()}</span><span style="font-weight:600;font-size:11px">${u.username}</span><span class="chip ${u.role==='admin'?'admin-chip':'chip-info'}" style="margin-left:auto;font-size:9px;padding:1px 5px">${u.role}</span></div>`).join('')}</div>
+        <div style="font-family:var(--mono);font-size:11px;padding:8px;background:var(--s2);border-radius:var(--r)">
+          <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--text2)">API</span><span style="color:var(--cyan)">DEMO</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--text2)">DB</span><span style="color:var(--green)">SQLite ✓</span></div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0"><span style="color:var(--text2)">Slack</span><span style="color:var(--text3)">Off</span></div>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:10px;font-size:11px" onclick="showPage('admin',document.getElementById('n-admin'))">⚙ Admin Panel →</button>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-hd"><span class="ci">🗓️</span> Hourly Heatmap</div>
+    <div class="card-body"><div class="hm-grid" id="heatmap"></div><div class="hm-lbl"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span></div></div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="ci">🔔</span> Recent Alerts <span class="cc">top 5</span>
+      <button class="btn btn-ghost" style="margin-left:auto;font-size:11px;padding:4px 10px" onclick="showPage('alerts',document.getElementById('n-alerts'))">View all →</button>
+    </div>
+    <div class="tw"><table><thead><tr><th>Rule</th><th>Severity</th><th>Source IP</th><th>Geo</th><th>Status</th><th></th></tr></thead><tbody id="dash-tbody"></tbody></table></div>
+  </div>`;
+}
+
+// ─── SOC LEAD FULL DASHBOARD ─────────────────────────
+function buildSocDash(){
+  const critOpen=ALERTS.filter(a=>a.severity==='critical'&&a.status==='open');
+  const investigating=ALERTS.filter(a=>a.status==='investigating');
+  const resolved=ALERTS.filter(a=>a.status==='resolved');
+  const analysts=USERS.filter(u=>u.role==='analyst');
+  const mttr=Math.floor(Math.random()*30)+15;
+
+  return `
+  <div style="background:linear-gradient(135deg,rgba(0,230,118,.06),transparent);border:1px solid rgba(0,230,118,.18);border-radius:var(--r2);padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px">
+    <span style="font-size:28px">🛡️</span>
+    <div><div style="font-size:16px;font-weight:900;color:var(--green)">SOC Lead Dashboard</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">Team overview · escalations · SLA · shift metrics</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px">
+      <button class="btn btn-ghost" style="font-size:11px" onclick="exportCSV()">⬇ Export</button>
+      <button class="btn btn-cyan" style="font-size:11px" onclick="showPage('reports',document.getElementById('n-reports'))">📑 Reports →</button>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+    <div class="stat-card c-crit"><div class="stat-icon">🚨</div><div class="stat-num" id="s-crit" style="font-size:36px">${critOpen.length}</div><div class="stat-label">Critical Open</div><div class="stat-delta" style="color:var(--red)">⚠ Escalate now</div></div>
+    <div class="stat-card c-high"><div class="stat-icon">🔄</div><div class="stat-num" id="s-high" style="font-size:36px">${investigating.length}</div><div class="stat-label">Investigating</div><div class="stat-delta">In progress</div></div>
+    <div class="stat-card" style="border-top:2px solid var(--green)"><div class="stat-icon">✅</div><div class="stat-num" style="font-size:36px;color:var(--green)">${resolved.length}</div><div class="stat-label" style="color:var(--text2)">Resolved</div><div class="stat-delta" style="color:var(--green)">↑ 33% vs last</div></div>
+    <div class="stat-card" style="border-top:2px solid var(--purple)"><div class="stat-icon">⏱</div><div class="stat-num" style="font-size:36px;color:var(--purple)">${mttr}m</div><div class="stat-label" style="color:var(--text2)">Avg MTTR</div><div class="stat-delta">Mean time to resolve</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-hd"><span class="ci">🚨</span> Critical Alerts — Escalation Required <span class="cc">${critOpen.length} open</span></div>
+      <div class="card-body" style="padding:10px">
+        ${critOpen.length?critOpen.map(a=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,61,87,.07);border:1px solid rgba(255,61,87,.2);border-left:3px solid var(--red);border-radius:0 var(--r) var(--r) 0;margin-bottom:7px">
+            <span style="width:8px;height:8px;background:var(--red);border-radius:50%;flex-shrink:0;animation:blink 1s infinite;box-shadow:0 0 8px var(--red)"></span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.rule_name}</div>
+              <div style="font-size:10px;color:var(--text2);font-family:var(--mono)">${a.source_ip} · ${a.geo||''} · ${rel(a.timestamp)}</div>
+            </div>
+            <button class="stt stt-inv" style="font-size:10px;padding:3px 8px" onclick="changeStatus('${a.id}','investigating')">Assign</button>
+            <button class="act" style="font-size:10px;padding:3px 8px" onclick="openDetail('${a.id}')">Details</button>
+          </div>`).join(''):`<div class="empty-state" style="padding:20px"><div class="ei">✅</div>No critical open alerts</div>`}
+        ${investigating.length?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)"><div style="font-size:10px;color:var(--text2);font-family:var(--mono);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Currently Investigating</div>
+          ${investigating.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,215,64,.06);border:1px solid rgba(255,215,64,.15);border-radius:var(--r);margin-bottom:5px"><span style="width:6px;height:6px;background:var(--yellow);border-radius:50%;flex-shrink:0;animation:blink 2s infinite"></span><div style="flex:1;font-size:11px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.rule_name}</div><button class="act" style="font-size:10px;padding:2px 7px" onclick="openDetail('${a.id}')">View</button></div>`).join('')}
+        </div>`:''}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ci">👥</span> Analyst Workload</div>
+      <div class="card-body" style="padding:14px">
+        ${analysts.map((u,i)=>{
+          const assigned=[2,3,1,2,1][i]||1;
+          const pct=Math.min(assigned*25,100);
+          const load=pct>75?'Overloaded':pct>50?'Busy':'Available';
+          const lc=pct>75?'var(--red)':pct>50?'var(--yellow)':'var(--green)';
+          return `<div style="margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <div style="width:28px;height:28px;border-radius:7px;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--cyan)">${u.username[0].toUpperCase()}</div>
+              <div style="flex:1"><div style="font-size:12px;font-weight:700">${u.username}</div><div style="font-size:10px;color:var(--text2);font-family:var(--mono)">${u.email}</div></div>
+              <span style="font-size:10px;font-weight:700;color:${lc};font-family:var(--mono)">${load}</span>
+            </div>
+            <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden"><div style="height:100%;background:${lc};border-radius:3px;width:${pct}%;transition:width 1s"></div></div>
+            <div style="font-size:10px;color:var(--text2);margin-top:3px;font-family:var(--mono)">${assigned} active alert${assigned>1?'s':''}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-hd"><span class="ci">📈</span> Alert Activity — Last 24h <span class="cc" id="chart-lbl">0 events</span></div>
+      <div class="card-body">
+        <div class="mini-bars" id="hourly-chart"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--text3);font-family:var(--mono)"><span>24h ago</span><span>18h</span><span>12h</span><span>6h</span><span>now</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ci">⚡</span> Live Alert Feed <span class="cc">auto-refresh</span></div>
+      <div class="card-body" style="padding:10px"><div id="live-feed" style="max-height:200px;overflow-y:auto"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><span class="ci">🔔</span> Full Alert Queue <span class="cc">${ALERTS.length} total</span>
+      <button class="btn btn-ghost" style="margin-left:auto;font-size:11px;padding:4px 10px" onclick="showPage('alerts',document.getElementById('n-alerts'))">View all →</button>
+    </div>
+    <div class="tw"><table><thead><tr><th>Rule</th><th>Severity</th><th>Source IP</th><th>Geo</th><th>Status</th><th></th></tr></thead><tbody id="dash-tbody"></tbody></table></div>
+  </div>`;
+}
+
+// ─── ANALYST FULL DASHBOARD ──────────────────────────
+function buildAnalystDash(){
+  const myQueue=ALERTS.filter(a=>a.status==='open'||a.status==='investigating');
+  const noteCount=Object.values(NOTES).reduce((t,n)=>t+n.length,0);
+  const critCount=ALERTS.filter(a=>a.severity==='critical'&&a.status==='open').length;
+
+  return `
+  <div style="background:linear-gradient(135deg,rgba(0,212,255,.06),transparent);border:1px solid rgba(0,212,255,.18);border-radius:var(--r2);padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <span style="font-size:28px">🔍</span>
+    <div><div style="font-size:16px;font-weight:900;color:var(--cyan)">Analyst Workspace</div><div style="font-size:11px;color:var(--text2);font-family:var(--mono);margin-top:2px">Logged in as <b style="color:var(--text)">${curUser}</b> · your personal investigation queue</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost" style="font-size:11px" onclick="openGlobalSearch()">🔍 Search</button>
+      <button class="btn btn-cyan" style="font-size:11px" onclick="showPage('mycases',document.getElementById('n-mycases'))">📁 My Cases →</button>
+    </div>
+  </div>
+
+  ${critCount?`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,61,87,.09);border:1px solid rgba(255,61,87,.25);border-radius:var(--r);margin-bottom:16px;animation:pulse 2s infinite">
+    <span style="font-size:18px">🚨</span>
+    <div><b style="color:var(--red)">${critCount} critical alert${critCount>1?'s are':' is'} open</b><span style="color:var(--text2);font-size:12px;margin-left:8px">— requires immediate investigation</span></div>
+    <button class="btn btn-danger" style="margin-left:auto;font-size:11px" onclick="showPage('alerts',document.getElementById('n-alerts'));setTimeout(()=>{document.getElementById('asev').value='critical';renderAlerts();},100)">View Critical →</button>
+  </div>`:''}
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+    <div class="stat-card c-open" style="cursor:pointer" onclick="showPage('mycases',document.getElementById('n-mycases'))"><div class="stat-icon">📁</div><div class="stat-num" style="font-size:36px">${myQueue.length}</div><div class="stat-label">In Your Queue</div><div class="stat-delta" style="color:var(--orange)">Click to manage →</div></div>
+    <div class="stat-card c-high"><div class="stat-icon">🔄</div><div class="stat-num" style="font-size:36px">${ALERTS.filter(a=>a.status==='investigating').length}</div><div class="stat-label">Investigating</div><div class="stat-delta">Active cases</div></div>
+    <div class="stat-card" style="border-top:2px solid var(--purple)"><div class="stat-icon">📝</div><div class="stat-num" style="font-size:36px;color:var(--purple)">${noteCount}</div><div class="stat-label" style="color:var(--text2)">Notes Written</div><div class="stat-delta">This session</div></div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px">
+    <div class="card">
+      <div class="card-hd"><span class="ci">📋</span> Your Alert Queue <span class="cc">${myQueue.length} items</span>
+        <button class="btn btn-ghost" style="margin-left:auto;font-size:11px;padding:4px 8px" onclick="showPage('mycases',document.getElementById('n-mycases'))">Full Queue →</button>
+      </div>
+      <div class="card-body" style="padding:10px">
+        ${myQueue.slice(0,5).map(a=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border:1px solid var(--border);border-left:3px solid ${a.severity==='critical'?'var(--red)':a.severity==='high'?'var(--yellow)':'var(--orange)'};border-radius:0 var(--r) var(--r) 0;margin-bottom:6px;transition:var(--tr)" onmouseover="this.style.borderRightColor='var(--cyan)'" onmouseout="this.style.borderRightColor='var(--border)'">
+            ${sevChip(a.severity)}
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.rule_name}</div>
+              <div style="font-size:10px;color:var(--text2);font-family:var(--mono)">${a.source_ip} · ${rel(a.timestamp)} · ${a.geo||''}</div>
+            </div>
+            ${stChip(a.status)}
+            <button class="act" style="font-size:10px;padding:3px 8px;color:var(--cyan);border-color:rgba(0,212,255,.3)" onclick="openDetail('${a.id}')">Investigate →</button>
+          </div>`).join('')||`<div class="empty-state" style="padding:20px"><div class="ei">🎉</div>Queue is clear!</div>`}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ci">🛠️</span> Quick Actions</div>
+      <div class="card-body" style="padding:12px;display:flex;flex-direction:column;gap:7px">
+        <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="showPage('alerts',document.getElementById('n-alerts'));setTimeout(()=>{document.getElementById('asev').value='critical';renderAlerts();},100)">🚨 Show Critical Alerts</button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="showPage('alerts',document.getElementById('n-alerts'));setTimeout(()=>{document.getElementById('astat').value='open';renderAlerts();},100)">🔔 Show Open Alerts</button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="showPage('mycases',document.getElementById('n-mycases'))">📁 My Cases</button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="showPage('timeline',document.getElementById('n-timeline'))">📅 Event Timeline</button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="showPage('commands',document.getElementById('n-commands'))">⌨️ Command Library</button>
+        <button class="btn btn-ghost" style="width:100%;justify-content:flex-start" onclick="openGlobalSearch()">🔍 Global Search (Ctrl+K)</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+    <div class="card">
+      <div class="card-hd"><span class="ci">⚡</span> Live Alert Feed <span class="cc">auto-refresh</span></div>
+      <div class="card-body" style="padding:10px"><div id="live-feed" style="max-height:200px;overflow-y:auto"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span class="ci">📅</span> Recent Events</div>
+      <div class="card-body" style="padding:10px">
+        ${ALERTS.slice(0,5).map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px"><span style="font-family:var(--mono);color:var(--text3);min-width:48px">${rel(a.timestamp)}</span>${sevChip(a.severity)}<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.rule_name}</span></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════
+function toggleTheme(){
+  isDark=!isDark;
+  document.body.classList.toggle('light',!isDark);
+  document.getElementById('themeBtn').textContent=isDark?'🌙':'☀️';
+  showSnack(isDark?'Dark mode':'Light mode');
+}
+
+// ═══════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════
+function toggleSidebar(){
+  sbCollapsed=!sbCollapsed;
+  document.getElementById('sb').classList.toggle('collapsed',sbCollapsed);
+  document.getElementById('topbar').classList.toggle('shifted',sbCollapsed);
+  document.getElementById('main').classList.toggle('shifted',sbCollapsed);
+  // Show/hide the floating expand tab
+  const tab=document.getElementById('expand-tab');
+  if(tab){tab.style.opacity=sbCollapsed?'1':'0';tab.style.pointerEvents=sbCollapsed?'auto':'none';}
+}
+
+// CLOCK
+function startClock(){
+  const el=document.getElementById('clock');
+  const tick=()=>el.textContent=new Date().toLocaleTimeString('en-GB',{hour12:false});
+  tick();clockInterval=setInterval(tick,1000);
+}
+
+// TICKER
+function buildTicker(){
+  const open=ALERTS.filter(a=>a.status==='open');
+  const text=open.map(a=>'<span style="color:var(--red)">▲</span> '+a.rule_name+' &nbsp;·&nbsp; '+a.source_ip+'  &nbsp;&nbsp;&nbsp;&nbsp;').join('');
+  const t=document.getElementById('ticker');
+  if(t)t.innerHTML=text+text;
+}
+
+// NAV META
+const META={
+  dashboard:     {icon:'📊',title:'Dashboard',      sub:'Security overview'},
+  alerts:        {icon:'🔔',title:'Alerts',         sub:'Suricata / Snort rules'},
+  'alert-detail':{icon:'🔍',title:'Alert Detail',   sub:'Full analysis'},
+  timeline:      {icon:'📅',title:'Timeline',       sub:'Chronological events'},
+  commands:      {icon:'⌨️', title:'Commands',       sub:'Security command library'},
+  admin:         {icon:'⚙️', title:'Admin Panel',    sub:'Users, logs & system'},
+  reports:       {icon:'📑', title:'SOC Reports',    sub:'Shift summaries & SLA metrics'},
+  mycases:       {icon:'📁', title:'My Cases',       sub:'Your personal investigation queue'},
+};
+function showPage(name,navEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl)navEl.classList.add('active');
+  const m=META[name]||{};
+  document.getElementById('bcicon').textContent=m.icon||'📄';
+  document.getElementById('bctitle').textContent=m.title||name;
+  document.getElementById('bcsub').textContent=m.sub||'';
+}
+function backToAlerts(){showPage('alerts',document.getElementById('n-alerts'));}
+
+// CHIPS
+function sevChip(s){
+  const d={critical:'dc',high:'dh',medium:'dm',low:'dl'};
+  return '<span class="chip chip-'+s+'"><span class="dot '+(d[s]||'dl')+'"></span>'+s+'</span>';
+}
+function stChip(s){return '<span class="chip chip-'+s+'">'+s+'</span>';}
+function fmt(iso){return new Date(iso).toLocaleString();}
+function rel(iso){
+  const d=Math.round((Date.now()-new Date(iso))/60000);
+  if(d<1)return 'just now';if(d<60)return d+'m ago';
+  if(d<1440)return Math.round(d/60)+'h ago';return Math.round(d/1440)+'d ago';
+}
+
+// ═══════════════════════════════════════
+// LIVE FEED
+// ═══════════════════════════════════════
+const feedPool=[
+  ['ET SCAN Port Sweep','192.168.1.99','10.0.0.1','critical'],
+  ['ET MALWARE Dropper','172.16.0.45','10.0.0.8','critical'],
+  ['ET DNS Tunneling','10.0.0.22','8.8.4.4','medium'],
+  ['ET POLICY Crypto Mining','10.0.0.77','pool.xmr.com','high'],
+  ['GPL ICMP Flood','198.18.0.50','10.0.0.1','medium'],
+  ['ET SCAN Masscan','203.0.113.9','10.0.0.0/24','low'],
+  ['ET TROJAN RAT Callback','10.0.0.44','91.200.12.5','critical'],
+  ['ET DNS Lookup .onion proxy','10.0.0.55','1.1.1.1','high'],
+  ['ET WEB_CLIENT PDF Exploit','10.0.0.99','45.33.32.156','high'],
+  ['ET POLICY Pastebin Upload','10.0.0.66','104.20.0.85','medium'],
+];
+function startFeed(){
+  feedInterval=setInterval(()=>{
+    const r=feedPool[Math.floor(Math.random()*feedPool.length)];
+    feedData.unshift({rule:r[0],src:r[1],dst:r[2],sev:r[3],t:new Date()});
+    if(feedData.length>8)feedData.pop();
+    renderFeed();
+  },3200);
+}
+function renderFeed(){
+  const el=document.getElementById('live-feed');if(!el)return;
+  const pc={critical:'fc',high:'fh',medium:'fm',low:'fl'};
+  el.innerHTML=feedData.length
+    ?feedData.map(f=>`<div class="feed-item"><span class="fpulse ${pc[f.sev]||'fl'}"></span><span class="fi-time">${f.t.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span><span class="fi-rule">${f.rule}</span><span class="fi-ip">${f.src}</span></div>`).join('')
+    :'<div style="color:var(--text3);font-family:var(--mono);font-size:11px;padding:8px">Waiting for events...</div>';
+}
+
+// ═══════════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════════
+function buildChart(){
+  const data=Array.from({length:24},(_,i)=>{
+    const h=(new Date().getHours()-23+i+24)%24;
+    const b=h>=8&&h<=20?4:1;
+    return Math.floor(Math.random()*b*3)+(i>20?3:0);
+  });
+  const max=Math.max(...data,1);
+  const cols=['var(--green)','var(--cyan)','var(--yellow)','var(--orange)','var(--red)'];
+  const el=document.getElementById('hourly-chart');if(!el)return;
+  el.innerHTML=data.map((v,i)=>{
+    const p=Math.max(Math.round((v/max)*100),4);
+    const c=cols[Math.min(Math.floor(v/3),4)];
+    const h=(new Date().getHours()-23+i+24)%24;
+    return `<div class="mb" style="height:${p}%;background:${c}" title="${String(h).padStart(2,'0')}:00 — ${v} alerts"></div>`;
+  }).join('');
+  document.getElementById('chart-lbl').textContent=data.reduce((a,b)=>a+b,0)+' events';
+}
+
+function buildDonut(){
+  // Donut is now rendered inline inside buildAdminDash() — no-op kept for safety
+}
+
+function buildCatBars(){
+  const catColors={Malware:'var(--red)','Trojan Activity':'var(--red)','Exploit':'var(--purple)','Brute Force':'var(--yellow)','Reconnaissance':'var(--orange)','Social Engineering':'var(--yellow)','Info Leak Attempt':'var(--blue)','DNS':'var(--cyan)','Policy Violation':'var(--blue)','Web Attack':'var(--orange)','Misc Activity':'var(--text2)'};
+  const cats={};
+  ALERTS.forEach(a=>{cats[a.category]=(cats[a.category]||0)+1;});
+  const max=Math.max(...Object.values(cats),1);
+  const el=document.getElementById('cat-bars');if(!el)return;
+  el.innerHTML=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([name,count])=>{
+    const pct=Math.round((count/max)*100);
+    const c=catColors[name]||'var(--cyan)';
+    return `<div class="cat-row"><div class="cat-name">${name}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c}"></div></div><div class="cat-count">${count}</div></div>`;
+  }).join('');
+}
+
+function buildHeatmap(){
+  const el=document.getElementById('heatmap');if(!el)return;
+  const vals=Array.from({length:24},(_,h)=>Math.floor(Math.random()*(h>=9&&h<=18?14:4)));
+  const max=Math.max(...vals,1);
+  const cols=['var(--s3)','rgba(0,212,255,.12)','rgba(0,212,255,.25)','rgba(255,215,64,.25)','rgba(255,145,0,.35)','rgba(255,61,87,.5)'];
+  el.innerHTML=vals.map((v,h)=>{
+    const i=Math.min(Math.floor((v/max)*5),5);
+    return `<div class="hm-cell" style="background:${cols[i]}" data-tip="${String(h).padStart(2,'0')}:00 — ${v} alerts"></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════
+function renderDashboard(){
+  const el=document.getElementById('dash-tbody');if(!el)return;
+  el.innerHTML=ALERTS.slice(0,5).map(a=>
+    `<tr><td><div class="rn">${a.rule_name}</div><div class="rc">${a.category}</div></td><td>${sevChip(a.severity)}</td><td class="ip">${a.source_ip}</td><td style="font-size:12px">${a.geo||''}</td><td>${stChip(a.status)}</td><td><button class="act" onclick="openDetail('${a.id}')">View →</button></td></tr>`
+  ).join('');
+}
+function updateStats(){
+  const set=(id,v)=>{const e=document.getElementById(id);if(e){e.style.animation='none';e.textContent=v;setTimeout(()=>e.style.animation='',10);}};
+  set('s-total',ALERTS.length);
+  set('s-crit',ALERTS.filter(a=>a.severity==='critical').length);
+  set('s-high',ALERTS.filter(a=>a.severity==='high').length);
+  set('s-open',ALERTS.filter(a=>a.status==='open').length);
+  // Update nav badge (open alerts)
+  document.querySelectorAll('#abadge').forEach(el=>el.textContent=ALERTS.filter(a=>a.status!=='resolved').length);
+}
+
+// ═══════════════════════════════════════
+// ALERTS TABLE
+// ═══════════════════════════════════════
+function populateCatFilter(){
+  const sel=document.getElementById('acat');if(!sel)return;
+  const existing=[...sel.options].map(o=>o.value);
+  [...new Set(ALERTS.map(a=>a.category))].sort().forEach(c=>{
+    if(!existing.includes(c)){const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);}
+  });
+}
+function clearFilters(){
+  ['asearch','asev','astat','acat'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  renderAlerts();
+}
+function sortAlerts(field){
+  if(alertSortField===field)alertSortDir=alertSortDir==='asc'?'desc':'asc';
+  else{alertSortField=field;alertSortDir='asc';}
+  renderAlerts();
+}
+function renderAlerts(){
+  const search=(document.getElementById('asearch').value||'').toLowerCase();
+  const sev=document.getElementById('asev').value;
+  const stat=document.getElementById('astat').value;
+  const cat=document.getElementById('acat').value;
+  let data=ALERTS.filter(a=>{
+    if(sev&&a.severity!==sev)return false;
+    if(stat&&a.status!==stat)return false;
+    if(cat&&a.category!==cat)return false;
+    if(search&&![a.rule_name,a.source_ip,a.dest_ip,a.message,a.category].join(' ').toLowerCase().includes(search))return false;
+    return true;
+  });
+  // sort
+  const order=alertSortDir==='asc'?1:-1;
+  data.sort((a,b)=>{
+    let av=a[alertSortField]||'',bv=b[alertSortField]||'';
+    if(alertSortField==='count'){av=+av;bv=+bv;return(av-bv)*order;}
+    return av.localeCompare(bv)*order;
+  });
+  // update headers
+  document.querySelectorAll('#alerts-table th').forEach(th=>{th.classList.remove('sort-asc','sort-desc');});
+  const tbody=document.getElementById('alerts-tbody');
+  const empty=document.getElementById('alerts-empty');
+  const cnt=document.getElementById('alerts-count');
+  if(!tbody)return;
+  if(!data.length){tbody.innerHTML='';empty.style.display='block';cnt.textContent='';document.querySelectorAll('#abadge').forEach(el=>el.textContent='0');return;}
+  empty.style.display='none';
+  document.querySelectorAll('#abadge').forEach(el=>el.textContent=data.length);
+  cnt.textContent='Showing '+data.length+' of '+ALERTS.length+' alerts';
+  tbody.innerHTML=data.map(a=>`
+    <tr>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--text2);white-space:nowrap">${rel(a.timestamp)}</td>
+      <td><div class="rn">${a.rule_name}</div><div class="rc">${a.category}</div></td>
+      <td>${sevChip(a.severity)}</td>
+      <td class="ip">${a.source_ip}</td>
+      <td class="ip">${a.dest_ip}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--text2)">${a.protocol}</td>
+      <td><span class="hit">${a.count}</span></td>
+      <td>${stChip(a.status)}</td>
+      <td style="font-size:12px;white-space:nowrap">${a.geo||''}</td>
+      <td>${(a.mitre||[]).slice(0,1).map(m=>`<span class="mitre-tag">${m}</span>`).join('')}</td>
+      <td><button class="act" onclick="openDetail('${a.id}')">View →</button></td>
+    </tr>`).join('');
+}
+
+// ═══════════════════════════════════════
+// DETAIL
+// ═══════════════════════════════════════
+function openDetail(id){
+  curAlertId=id;
+  const a=ALERTS.find(x=>x.id===id);if(!a)return;
+  showPage('alert-detail',null);
+  document.getElementById('n-alerts').classList.add('active');
+  const notes=NOTES[id]||[];
+  const cmds=['whois '+a.source_ip,'nslookup '+a.source_ip,'ss -an | grep '+a.source_ip,'curl -s https://ipinfo.io/'+a.source_ip];
+  const statusBtns=[
+    '<button class="stt stt-open'+(a.status==='open'?' active':'')+"\" onclick=\"changeStatus('"+id+"','open')\">Open</button>",
+    '<button class="stt stt-inv'+(a.status==='investigating'?' active':'')+"\" onclick=\"changeStatus('"+id+"','investigating')\">Investigating</button>",
+    '<button class="stt stt-res'+(a.status==='resolved'?' active':'')+"\" onclick=\"changeStatus('"+id+"','resolved')\">Resolved</button>",
+  ].join('');
+  const mitreHtml=(a.mitre||[]).map(m=>`<span class="mitre-tag" title="MITRE ATT&CK Technique">${m}</span>`).join('');
+  const noteHtml=notes.length
+    ?notes.map(n=>`<div class="note-item"><div class="note-meta"><span>👤 ${n.user}</span><span style="color:var(--text3)">·</span><span>${n.time}</span><span class="chip chip-${n.sev}" style="font-size:9px;padding:1px 6px">${n.sev}</span></div><div class="note-text">${n.text}</div></div>`).join('')
+    :'<div class="note-empty">📝 No notes yet — add the first below</div>';
+
+  document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">
+      ${sevChip(a.severity)}
+      <span style="font-size:17px;font-weight:900;color:var(--text)">${a.rule_name}</span>
+      <span style="margin-left:auto;font-size:20px">${a.geo?a.geo.split(' ')[0]:''}</span>
+    </div>
+    <div style="margin-bottom:14px">${mitreHtml}</div>
+    <div class="detail-grid">
+      <div>
+        <div class="detail-fields">
+          <div class="fb"><div class="fl2">Alert ID</div><div class="fv">${a.id}</div></div>
+          <div class="fb"><div class="fl2">Timestamp</div><div class="fv">${fmt(a.timestamp)}</div></div>
+          <div class="fb"><div class="fl2">Source IP</div><div class="fv">${a.source_ip}</div></div>
+          <div class="fb"><div class="fl2">Destination IP</div><div class="fv">${a.dest_ip}</div></div>
+          <div class="fb"><div class="fl2">Protocol</div><div class="fv">${a.protocol}</div></div>
+          <div class="fb"><div class="fl2">Category</div><div class="fv">${a.category}</div></div>
+          <div class="fb"><div class="fl2">Hit Count</div><div class="fv">${a.count.toLocaleString()} events</div></div>
+          <div class="fb"><div class="fl2">Geo / ASN</div><div class="fv">${a.geo||'Unknown'} · ${a.asn||'—'}</div></div>
+        </div>
+        <div class="msg-box">${a.message}</div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-hd"><span class="ci">🔁</span> Change Status</div>
+          <div class="card-body" style="padding:12px 16px">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Current: ${stChip(a.status)}</div>
+            <div class="status-btns">${statusBtns}</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="ci">📝</span> Analyst Notes <span class="cc">${notes.length} note${notes.length!==1?'s':''}</span></div>
+          <div class="card-body">
+            <div class="notes-list" id="notes-list">${noteHtml}</div>
+            <div class="note-form">
+              <textarea id="note-input" rows="3" placeholder="Add analysis notes, IOCs, remediation steps, or findings..."></textarea>
+              <div class="note-form-row">
+                <select class="fs" id="note-sev" style="min-width:110px"><option value="info">Info</option><option value="warning">Warning</option><option value="critical">Critical</option></select>
+                <button class="add-note-btn" onclick="addNote()">+ Add Note</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-hd"><span class="ci">🔍</span> Quick Commands</div>
+          <div class="card-body" style="padding:10px">
+            ${cmds.map(c=>`<div class="cmd-sugg"><span>${c}</span><button class="copy-mini" data-cmd="${c.replace(/"/g,'&quot;')}" onclick="copyText(this.dataset.cmd)">copy</button></div>`).join('')}
+          </div>
+        </div>
+        <div class="geo-panel">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span class="geo-flag">${a.geo?a.geo.split(' ')[0]:'🌐'}</span>
+            <span style="font-weight:700;font-size:13px">${a.geo?a.geo.split(' ').slice(1).join(' '):'Unknown'}</span>
+          </div>
+          <div class="geo-row"><span class="geo-key">Source IP</span><span class="geo-val">${a.source_ip}</span></div>
+          <div class="geo-row"><span class="geo-key">Destination</span><span class="geo-val">${a.dest_ip}</span></div>
+          <div class="geo-row"><span class="geo-key">ASN</span><span class="geo-val">${a.asn||'Unknown'}</span></div>
+          <div class="geo-row"><span class="geo-key">Country</span><span class="geo-val">${a.country||'Unknown'}</span></div>
+          <div class="geo-row"><span class="geo-key">Protocol</span><span class="geo-val">${a.protocol}</span></div>
+        </div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-hd"><span class="ci">🛡️</span> MITRE ATT&CK</div>
+          <div class="card-body" style="padding:12px">${(a.mitre||[]).map(m=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="mitre-tag">${m}</span><a href="https://attack.mitre.org/techniques/${m.replace('.','/')}/" target="_blank" style="font-size:10px;color:var(--text3);font-family:var(--mono);text-decoration:none">View ↗</a></div>`).join('')}</div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="ci">📊</span> Event Volume</div>
+          <div class="card-body" style="padding:12px">
+            <div style="font-size:36px;font-weight:900;font-family:var(--mono);color:var(--cyan)">${a.count.toLocaleString()}</div>
+            <div style="font-size:10px;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-top:4px">total detections</div>
+            <div style="height:5px;background:var(--s3);border-radius:3px;margin-top:12px;overflow:hidden"><div style="height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:3px;width:${Math.min(a.count/900*100,100)}%;transition:width 1s"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function changeStatus(id,ns){
+  const a=ALERTS.find(x=>x.id===id);if(!a)return;
+  const old=a.status;a.status=ns;
+  LOGS.unshift({time:new Date().toISOString(),action:'status_change',user:curUser,detail:`Alert ${id}: ${old} → ${ns}`});
+  openDetail(id);renderAlerts();renderDashboard();updateStats();buildTicker();buildDonut();
+  showSnack('Status → '+ns,'ok');
+}
+function addNote(){
+  const text=document.getElementById('note-input').value.trim();if(!text)return;
+  const sev=document.getElementById('note-sev').value;
+  if(!NOTES[curAlertId])NOTES[curAlertId]=[];
+  NOTES[curAlertId].push({user:curUser,time:new Date().toLocaleString(),text,sev});
+  LOGS.unshift({time:new Date().toISOString(),action:'alert_note',user:curUser,detail:'Note added to '+curAlertId});
+  openDetail(curAlertId);
+  showSnack('Note saved','ok');
+}
+
+// ═══════════════════════════════════════
+// TIMELINE
+// ═══════════════════════════════════════
+function renderTimeline(){
+  // Timeline is now fully built by applyTimelineRoleUI() per role
+  applyTimelineRoleUI();
+}
+
+// ═══════════════════════════════════════
+// COMMANDS
+// ═══════════════════════════════════════
+const catCls={network:'cn',logs:'cl',forensics:'cf',system:'cs','threat-hunting':'ct',general:'cg'};
+const catIco={network:'🌐',logs:'📋',forensics:'🔬',system:'🖥️','threat-hunting':'🎯',general:'⌨️'};
+
+function renderCmds(){
+  const search=(document.getElementById('csearch').value||'').toLowerCase();
+  const cat=document.getElementById('ccat').value;
+  let data=COMMANDS.filter(c=>{
+    if(cat&&c.category!==cat)return false;
+    if(search&&![c.title,c.command,c.description].join(' ').toLowerCase().includes(search))return false;
+    return true;
+  });
+  const g=document.getElementById('cmd-grid');
+  const e=document.getElementById('cmd-empty');
+  if(!g)return;
+  if(!data.length){g.innerHTML='';e.style.display='block';return;}
+  e.style.display='none';
+  g.innerHTML=data.map(c=>`
+    <div class="cmd-card">
+      <div class="cmd-head">
+        <div class="cmd-ico">${catIco[c.category]||'⌨️'}</div>
+        <div><div class="cmd-title">${c.title}</div><div class="cmd-desc">${c.description||''}</div></div>
+      </div>
+      <div class="cmd-code-wrap">
+        <pre class="cmd-code">${c.command.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+        <button class="cmd-copy" data-cmd="${c.command.replace(/"/g,'&quot;').replace(/'/g,'&#39;')}" onclick="copyText(this.dataset.cmd)">copy</button>
+      </div>
+      <div class="cmd-foot">
+        ${c.tags.split(',').filter(t=>t.trim()).map(t=>`<span class="tag">${t.trim()}</span>`).join('')}
+        <span class="cpill ${catCls[c.category]||'cg'}">${c.category}</span>
+        <button class="act" style="margin-left:4px;color:var(--red);border-color:rgba(255,61,87,.2)" onclick="deleteCmd(${c.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+let editCmdId=null;
+function openCmdModal(id){
+  editCmdId=id||null;
+  if(id){
+    const c=COMMANDS.find(x=>x.id===id);
+    document.getElementById('cmf-title').value=c.title;document.getElementById('cmf-cmd').value=c.command;
+    document.getElementById('cmf-desc').value=c.description||'';document.getElementById('cmf-cat').value=c.category;
+    document.getElementById('cmf-tags').value=c.tags;
+    document.getElementById('cmd-modal-h').textContent='Edit Command';
+  }else{
+    ['cmf-title','cmf-cmd','cmf-desc','cmf-tags'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('cmf-cat').value='general';
+    document.getElementById('cmd-modal-h').textContent='New Command';
+  }
+  document.getElementById('cmd-modal').classList.add('open');
+}
+function closeCmdModal(){document.getElementById('cmd-modal').classList.remove('open');}
+function saveCmd(){
+  const title=document.getElementById('cmf-title').value.trim();
+  const command=document.getElementById('cmf-cmd').value.trim();
+  if(!title||!command){showSnack('Title and command required','err');return;}
+  const obj={title,command,description:document.getElementById('cmf-desc').value.trim(),category:document.getElementById('cmf-cat').value,tags:document.getElementById('cmf-tags').value.trim()||'general'};
+  if(editCmdId){const i=COMMANDS.findIndex(c=>c.id===editCmdId);COMMANDS[i]={...COMMANDS[i],...obj};showSnack('Command updated','ok');}
+  else{COMMANDS.push({id:cmdId++,...obj});LOGS.unshift({time:new Date().toISOString(),action:'cmd_create',user:curUser,detail:'Created: '+title});showSnack('Command created','ok');}
+  closeCmdModal();renderCmds();
+}
+function deleteCmd(id){
+  if(!confirm('Delete this command?'))return;
+  COMMANDS=COMMANDS.filter(c=>c.id!==id);renderCmds();showSnack('Deleted');
+}
+
+// ═══════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════
+function switchTab(name,el){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tc-'+name).classList.add('active');
+}
+function renderUsers(){
+  const el=document.getElementById('users-tbody');if(!el)return;
+  el.innerHTML=USERS.map(u=>`
+    <tr>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${u.id}</td>
+      <td style="font-weight:700">${u.username}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${u.email}</td>
+      <td>${u.role==='admin'?'<span class="chip admin-chip">ADMIN</span>':'<span class="chip chip-info">ANALYST</span>'}</td>
+      <td><span class="chip chip-resolved">${u.status}</span></td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${u.lastLogin||'—'}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text2)">${u.created}</td>
+      <td>${u.id===1?'<span style="font-size:10px;color:var(--text3);font-family:var(--mono)">protected</span>':'<button class="btn btn-danger" style="padding:4px 10px;font-size:11px" onclick="deleteUser('+u.id+')">Delete</button>'}</td>
+    </tr>`).join('');
+}
+function renderLogs(){
+  const el=document.getElementById('logs-tbody');if(!el)return;
+  const ac={login:'var(--cyan)',alert_note:'var(--yellow)',status_change:'var(--orange)',cmd_create:'var(--purple)',user_create:'var(--green)',config:'var(--blue)',user_delete:'var(--red)'};
+  el.innerHTML=LOGS.slice(0,40).map(l=>{
+    const t=typeof l.time==='string'&&l.time.includes('T')?fmt(l.time):l.time;
+    const c=ac[l.action]||'var(--text2)';
+    return `<tr><td style="font-family:var(--mono);font-size:10px;color:var(--text2);white-space:nowrap">${t}</td><td><span class="chip" style="background:${c}22;color:${c};border:1px solid ${c}44">${l.action}</span></td><td style="font-weight:600;font-size:12px">${l.user}</td><td style="font-size:12px;color:var(--text2)">${l.detail}</td></tr>`;
+  }).join('');
+}
+function openUserModal(){document.getElementById('user-modal').classList.add('open');}
+function closeUserModal(){document.getElementById('user-modal').classList.remove('open');['uf-n','uf-e','uf-p'].forEach(i=>{const e=document.getElementById(i);if(e)e.value='';});}
+function saveUser(){
+  const name=document.getElementById('uf-n').value.trim();
+  const email=document.getElementById('uf-e').value.trim();
+  const role=document.getElementById('uf-r').value;
+  if(!name||!email){showSnack('Username and email required','err');return;}
+  USERS.push({id:userId++,username:name,email,role,status:'active',lastLogin:'Never',created:new Date().toISOString().split('T')[0]});
+  LOGS.unshift({time:new Date().toISOString(),action:'user_create',user:curUser,detail:'Created: '+name});
+  closeUserModal();renderUsers();renderLogs();showSnack('User created','ok');
+}
+function deleteUser(id){
+  if(!confirm('Delete this user?'))return;
+  const u=USERS.find(x=>x.id===id);USERS=USERS.filter(x=>x.id!==id);
+  LOGS.unshift({time:new Date().toISOString(),action:'user_delete',user:curUser,detail:'Deleted: '+(u?u.username:id)});
+  renderUsers();renderLogs();showSnack('User deleted');
+}
+
+// ═══════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════
+function exportCSV(){
+  const rows=[['ID','Timestamp','Rule Name','Severity','Source IP','Dest IP','Protocol','Category','Status','Hits','Geo','MITRE']];
+  ALERTS.forEach(a=>rows.push([a.id,a.timestamp,'"'+a.rule_name+'"',a.severity,a.source_ip,a.dest_ip,a.protocol,'"'+a.category+'"',a.status,a.count,'"'+(a.geo||'')+'"','"'+(a.mitre||[]).join('; ')+'"']));
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='shallot-alerts-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  showSnack('CSV exported','ok');
+  LOGS.unshift({time:new Date().toISOString(),action:'export',user:curUser,detail:'Exported '+ALERTS.length+' alerts to CSV'});
+}
+
+// ═══════════════════════════════════════
+// GLOBAL SEARCH
+// ═══════════════════════════════════════
+function openGlobalSearch(){
+  document.getElementById('global-search-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('gs-input').focus(),50);
+}
+function closeGlobalSearch(e){
+  if(!e||e.target===document.getElementById('global-search-overlay'))
+    document.getElementById('global-search-overlay').classList.remove('open');
+}
+function doGlobalSearch(q){
+  const el=document.getElementById('gs-results');if(!el)return;
+  if(!q.trim()){el.innerHTML='<div class="gs-empty">Start typing to search alerts, commands...</div>';return;}
+  const ql=q.toLowerCase();
+  const alertResults=ALERTS.filter(a=>[a.rule_name,a.source_ip,a.category,a.message].join(' ').toLowerCase().includes(ql)).slice(0,4);
+  const cmdResults=COMMANDS.filter(c=>[c.title,c.command,c.description].join(' ').toLowerCase().includes(ql)).slice(0,3);
+  let html='';
+  alertResults.forEach(a=>{html+=`<div class="gs-result" onclick="openDetail('${a.id}');closeGlobalSearch()"><span class="gs-icon">${a.severity==='critical'?'🚨':a.severity==='high'?'⚠️':'🔔'}</span><div><div class="gs-title">${a.rule_name}</div><div class="gs-sub">${a.source_ip} · ${rel(a.timestamp)}</div></div><span class="gs-cat">${a.category}</span></div>`;});
+  cmdResults.forEach(c=>{html+=`<div class="gs-result" onclick="showPage('commands',document.getElementById('n-commands'));closeGlobalSearch();setTimeout(()=>{document.getElementById('csearch').value='${c.title}';renderCmds();},100)"><span class="gs-icon">⌨️</span><div><div class="gs-title">${c.title}</div><div class="gs-sub">${c.command.substring(0,40)}</div></div><span class="gs-cat">${c.category}</span></div>`;});
+  el.innerHTML=html||'<div class="gs-empty">No results for "'+q+'"</div>';
+}
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+function copyText(t){
+  navigator.clipboard.writeText(t).then(()=>showSnack('✓ Copied to clipboard','ok')).catch(()=>showSnack('Copy failed','err'));
+}
+function showSnack(msg,type){
+  const el=document.getElementById('snack');
+  el.textContent=msg;
+  el.classList.remove('snack-err','snack-ok');
+  if(type==='err')el.classList.add('snack-err');
+  else if(type==='ok')el.classList.add('snack-ok');
+  el.classList.add('show');
+  clearTimeout(snackTimer);snackTimer=setTimeout(()=>el.classList.remove('show'),2400);
+}
+
+// Close modals on backdrop
+document.querySelectorAll('.mo').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('app')||document.getElementById('app').style.display==='none')return;
+  if(e.key==='Escape'){
+    document.querySelectorAll('.mo.open').forEach(o=>o.classList.remove('open'));
+    closeGlobalSearch();return;
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openGlobalSearch();return;}
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
+  // Role-aware keyboard nav
+  const navMap={
+    admin:   {'1':'dashboard','2':'alerts','3':'timeline','4':'commands','5':'admin'},
+    soc_lead:{'1':'dashboard','2':'alerts','3':'reports', '4':'timeline','5':'commands'},
+    analyst: {'1':'dashboard','2':'mycases','3':'alerts', '4':'commands','5':'timeline'},
+  };
+  const map=navMap[curRole]||navMap.admin;
+  if(map[e.key]){const pid=map[e.key];showPage(pid,document.getElementById('n-'+pid));}
+  if(e.key==='[')toggleSidebar();
+  if(e.key==='t')toggleTheme();
+  if(e.key==='/'){{e.preventDefault();openGlobalSearch();}}
+});
+
+function renderAll(){
+  renderRoleDashboard();
+  // Charts are injected into dashboard HTML — rebuild after DOM update
+  buildChart();
+  buildHeatmap();
+  buildCatBars();
+  renderFeed();
+  updateStats();
+  renderDashboard();
+  renderAlerts();
+  renderCmds();
+  renderUsers();
+  renderLogs();
+  applyAlertsRoleUI();
+  applyTimelineRoleUI();
+  if(curRole==='soc_lead') renderReportsPage();
+  if(curRole==='analyst')  renderMyCasesPage();
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('lp').addEventListener('keyup',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('lu').addEventListener('keyup',e=>{if(e.key==='Enter')doLogin();});
+  document.getElementById('gs-input').addEventListener('keyup',e=>{if(e.key==='Escape')closeGlobalSearch();});
+});
+</script>
+</body>
 </html>

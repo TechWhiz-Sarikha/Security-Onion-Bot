@@ -1,3 +1,5 @@
+
+
 import { createRouter, createWebHistory, RouteLocationNormalized, NavigationGuardNext, RouteLocation } from 'vue-router'
 import { store } from '../store'
 import LoginView from '../views/auth/LoginView.vue'

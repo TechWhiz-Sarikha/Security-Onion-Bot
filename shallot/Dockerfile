@@ -10,6 +10,9 @@ RUN npm run build
 # Stage 2: Build Backend
 FROM python:3.13-slim AS backend-builder
 WORKDIR /app
+# Copy start-docker.sh into the image
+COPY start-docker.sh /start-docker.sh
+RUN chmod +x /start-docker.sh
 
 # Copy the entire backend directory
 COPY backend/ .

@@ -58,6 +58,7 @@ class MatrixClient:
                     return
                     
                 if not all([self._homeserver_url, self._user_id, self._access_token]):
+                    self._enabled = False
                     self._status = "missing credentials"
                     return
 

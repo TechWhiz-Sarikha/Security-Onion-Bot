@@ -18,6 +18,8 @@ from datetime import datetime, timedelta
 import json
 import httpx
 from ...core.securityonion import client
+from ...core.mock_alerts import get_mock_alerts, format_alerts
+from ...config import settings
 from ...core.chat_manager import chat_manager
 from .validation import command_validator
 from ...core.permissions import CommandPermission
@@ -37,9 +39,9 @@ async def process(command: str, user_id: str = None, platform: ChatService = Non
     Usage: !alerts
     """
     try:
-        # Ensure we have a valid connection
-        if not client._connected:
-            return "Error: Not connected to Security Onion"
+        # Demo fallback for local presentation or disconnected Security Onion.
+        if settings.DEMO_MODE or not client._connected:
+            return format_alerts(get_mock_alerts(limit=5))
         
         # Query alerts from Security Onion
         base_url = client._base_url.rstrip('/') + '/'
@@ -154,7 +156,7 @@ async def process(command: str, user_id: str = None, platform: ChatService = Non
                         
                         if len(alerts) > 0:
                             # Format alerts for display
-                            alert_lines = ["Here are the newest 5 alerts:"]
+                            alert_lines = [f"Found {len(alerts)} alerts in the last 24 hours:"]
                             
                             for alert in alerts:
                                 # Add a blank line before each alert except the first one

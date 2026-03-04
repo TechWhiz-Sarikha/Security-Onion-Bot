@@ -1,9 +1,28 @@
 from typing import AsyncGenerator
+from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import text
 
 from .config import settings
+
+
+def _ensure_sqlite_directory(database_url: str) -> None:
+    """Create local SQLite directory if needed."""
+    sqlite_prefix = "sqlite+aiosqlite:///"
+    if not database_url.startswith(sqlite_prefix):
+        return
+
+    db_path = database_url[len(sqlite_prefix):]
+    if db_path.startswith("./"):
+        db_path = db_path[2:]
+
+    path_obj = Path(db_path)
+    if path_obj.parent and str(path_obj.parent) != ".":
+        path_obj.parent.mkdir(parents=True, exist_ok=True)
+
+
+_ensure_sqlite_directory(settings.DATABASE_URL)
 
 # Create async engine
 engine = create_async_engine(

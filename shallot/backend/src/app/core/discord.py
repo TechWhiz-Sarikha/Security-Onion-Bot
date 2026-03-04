@@ -41,6 +41,7 @@ class DiscordClient:
                     return
                     
                 if not self._bot_token:
+                    self._enabled = False
                     self._status = "no bot token configured"
                     return
                 

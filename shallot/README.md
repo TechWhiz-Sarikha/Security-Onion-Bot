@@ -100,6 +100,7 @@ npm run dev
 - [Setup Guide](docs/setup.html)
 - [API Documentation](docs/openapi.json)
 - [Contributing Guidelines](CONTRIBUTING.md)
+- [Local Demo (No Docker)](LOCAL_DEMO.md)
 
 ## Development
 

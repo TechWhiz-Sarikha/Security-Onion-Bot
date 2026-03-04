@@ -52,10 +52,12 @@ class SlackClient:
                     return
                     
                 if not self._bot_token:
+                    self._enabled = False
                     self._status = "no bot token configured"
                     return
 
                 if not self._app_token:
+                    self._enabled = False
                     self._status = "no app token configured"
                     return
 
